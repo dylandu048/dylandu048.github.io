@@ -3,599 +3,1083 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文献解读站</title>
+  <title>Dive into AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ====== Primitives ====== */
     :root {
-      --bg-primary: #fafafa;
-      --bg-secondary: #ffffff;
-      --bg-card: #ffffff;
-      --text-primary: #1a1a2e;
-      --text-secondary: #555;
-      --text-muted: #888;
-      --accent: #2563eb;
-      --accent-light: #dbeafe;
-      --accent-hover: #1d4ed8;
-      --border: #e5e7eb;
-      --shadow: 0 2px 8px rgba(0,0,0,0.06);
-      --shadow-hover: 0 8px 24px rgba(0,0,0,0.1);
-      --radius: 12px;
+      --bg-base: #0A0E17;
+      --bg-elevated: #111827;
+      --bg-card: #161B22;
+      --bg-inset: #0D1117;
+
+      --text-primary: #E5E7EB;
+      --text-secondary: #9CA3AF;
+      --text-tertiary: #6B7280;
+      --text-muted: #4B5563;
+
+      --accent: #6366F1;
+      --accent-light: rgba(99, 102, 241, 0.15);
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --accent-hover: #818CF8;
+
+      --border-standard: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(99, 102, 241, 0.35);
+      --border-focus: rgba(99, 102, 241, 0.25);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+
+      --shadow-rest: 0 0 0 1px rgba(255,255,255,0.04);
+      --shadow-hover: 0 0 0 1px var(--border-hover), 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-glow: 0 0 20px rgba(99,102,241,0.15);
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+      --transition-fast: 0.15s ease;
+      --transition-base: 0.3s ease;
     }
 
-    [data-theme="dark"] {
-      --bg-primary: #0f0f1a;
-      --bg-secondary: #16162a;
-      --bg-card: #1e1e3a;
-      --text-primary: #f0f0f5;
-      --text-secondary: #b0b0c0;
-      --text-muted: #777;
-      --accent: #60a5fa;
-      --accent-light: rgba(96,165,250,0.15);
-      --accent-hover: #93c5fd;
-      --border: #2a2a4a;
-      --shadow: 0 2px 8px rgba(0,0,0,0.3);
-      --shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
-    }
+    /* ====== Domain Colors ====== */
+    .field-chip      { --field: #3B82F6; --field-glow: rgba(59,130,246,0.25); --field-bg: rgba(59,130,246,0.1); }
+    .field-interconnect { --field: #10B981; --field-glow: rgba(16,185,129,0.25); --field-bg: rgba(16,185,129,0.1); }
+    .field-llm       { --field: #8B5CF6; --field-glow: rgba(139,92,246,0.25); --field-bg: rgba(139,92,246,0.1); }
+    .field-compress  { --field: #F59E0B; --field-glow: rgba(245,158,11,0.25); --field-bg: rgba(245,158,11,0.1); }
+    .field-inference { --field: #EC4899; --field-glow: rgba(236,72,153,0.25); --field-bg: rgba(236,72,153,0.1); }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
+      font-family: var(--font-sans);
+      background: var(--bg-base);
       color: var(--text-primary);
-      line-height: 1.7;
-      transition: background 0.3s, color 0.3s;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Header */
-    header {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(12px);
+    /* ====== Background Grid Effect ====== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
     }
+
+    /* ====== Navigation ====== */
     nav {
+      position: relative;
+      z-index: 10;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 24px;
+      padding: 0 var(--space-6);
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 64px;
     }
-    .logo {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 1.4rem;
+
+    .nav-brand {
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-primary);
       text-decoration: none;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
     }
-    .logo span { color: var(--accent); }
-    .nav-links { display: flex; gap: 8px; align-items: center; }
+
+    .nav-brand .brand-icon {
+      width: 28px;
+      height: 28px;
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
     .nav-links a {
       text-decoration: none;
       color: var(--text-secondary);
-      font-size: 0.9rem;
-      padding: 8px 16px;
-      border-radius: 8px;
-      transition: all 0.2s;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
     }
-    .nav-links a:hover { background: var(--accent-light); color: var(--accent); }
-    .theme-btn {
-      background: none; border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 12px; cursor: pointer; color: var(--text-secondary);
-      font-size: 1rem; transition: all 0.2s;
-    }
-    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
 
-    /* Hero */
+    .nav-links a:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ====== Hero ====== */
     .hero {
+      position: relative;
+      z-index: 1;
+      border-bottom: 1px solid var(--border-standard);
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 60%);
+    }
+
+    .hero-inner {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 80px 24px 48px;
-      text-align: center;
+      padding: var(--space-20) var(--space-6) var(--space-12);
     }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--accent-light);
+      color: var(--accent-hover);
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 50px;
+      margin-bottom: var(--space-5);
+      border: 1px solid rgba(99,102,241,0.2);
+      letter-spacing: 0.3px;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-glow);
+      animation: pulse-glow 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent-glow); }
+      50% { opacity: 0.5; box-shadow: 0 0 2px var(--accent-glow); }
+    }
+
     .hero h1 {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 2.8rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      letter-spacing: 2px;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin-bottom: var(--space-4);
+      letter-spacing: -0.02em;
     }
-    .hero p {
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--accent) 0%, #A855F7 50%, #EC4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
       font-size: 1.1rem;
       color: var(--text-secondary);
-      max-width: 560px;
-      margin: 0 auto 32px;
-    }
-    .search-box {
       max-width: 520px;
-      margin: 0 auto;
-      position: relative;
+      margin-bottom: var(--space-10);
+      line-height: 1.7;
     }
-    .search-box input {
+
+    /* ====== Stats ====== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--space-5);
+      max-width: 560px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-6);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), #A855F7);
+      opacity: 0.6;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-2px);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .stat-card .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-card .stat-delta {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .stat-delta .trend-up {
+      color: #34D399;
+      font-weight: 700;
+    }
+
+    /* ====== Main Content ====== */
+    .main {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-6) var(--space-16);
+    }
+
+    /* ====== Section Header ====== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .section-count {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      margin-top: var(--space-1);
+    }
+
+    /* ====== Search ====== */
+    .search-wrap {
+      position: relative;
       width: 100%;
-      padding: 14px 20px 14px 48px;
-      border: 1px solid var(--border);
-      border-radius: 50px;
+      max-width: 360px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: var(--space-3) var(--space-4) var(--space-3) 42px;
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-md);
       background: var(--bg-card);
       color: var(--text-primary);
-      font-size: 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
       outline: none;
-      transition: all 0.2s;
+      transition: all var(--transition-fast);
     }
-    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
-    .search-box svg {
+
+    .search-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--border-focus), 0 0 20px rgba(99,102,241,0.1);
+    }
+
+    .search-wrap svg {
       position: absolute;
-      left: 18px; top: 50%;
+      left: 14px;
+      top: 50%;
       transform: translateY(-50%);
-      width: 20px; height: 20px;
-      fill: var(--text-muted);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
     }
 
-    /* Stats */
-    .stats {
-      display: flex;
-      justify-content: center;
-      gap: 48px;
-      margin-top: 40px;
-      flex-wrap: wrap;
-    }
-    .stat-item { text-align: center; }
-    .stat-item .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
-    .stat-item .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-
-    /* Main Content */
-    main { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px; }
-
-    /* Category Filter */
-    .filter-section { margin-bottom: 32px; }
-    .filter-title {
-      font-size: 0.85rem; color: var(--text-muted);
-      margin-bottom: 12px; font-weight: 500;
-    }
-    .filter-tags {
+    /* ====== Domain Filters ====== */
+    .filter-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--border-standard);
     }
-    .filter-tag {
-      padding: 8px 18px;
-      border-radius: 50px;
-      border: 1px solid var(--border);
+
+    .filter-btn {
+      appearance: none;
+      border: 1px solid var(--border-standard);
       background: var(--bg-card);
       color: var(--text-secondary);
-      font-size: 0.9rem;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: var(--space-2) var(--space-5);
+      border-radius: 50px;
       cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-    .filter-tag:hover { border-color: var(--accent); color: var(--accent); }
-    .filter-tag.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
     }
 
-    /* Papers Grid */
+    .filter-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--accent), #7C3AED);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 0 16px rgba(99,102,241,0.3);
+    }
+
+    .filter-btn .filter-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.5;
+    }
+
+    .filter-btn.active .filter-dot {
+      opacity: 1;
+      background: #fff;
+    }
+
+    /* ====== Papers Grid ====== */
     .papers-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 24px;
-    }
-    @media (max-width: 420px) {
-      .papers-grid { grid-template-columns: 1fr; }
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-5);
     }
 
+    @media (min-width: 1024px) {
+      .papers-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .papers-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .papers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ====== Paper Card ====== */
     .paper-card {
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      transition: all 0.25s;
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      transition: all var(--transition-base);
       display: flex;
       flex-direction: column;
       height: 100%;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
     }
-    .paper-card:hover {
-      box-shadow: var(--shadow-hover);
-      transform: translateY(-3px);
-      border-color: var(--accent);
-    }
-    .paper-card.hidden { display: none; }
 
-    .paper-meta {
+    .paper-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--field, var(--accent));
+      opacity: 0;
+      transition: opacity var(--transition-base);
+      box-shadow: 0 0 12px var(--field-glow, var(--accent-glow));
+    }
+
+    .paper-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-hover), 0 0 30px var(--field-glow, var(--accent-glow));
+      transform: translateY(-4px);
+    }
+
+    .paper-card:hover::before {
+      opacity: 1;
+    }
+
+    .paper-card.hidden {
+      display: none;
+    }
+
+    .card-header {
       display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .field-badge {
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-    .paper-category {
-      padding: 4px 12px;
+      gap: var(--space-2);
+      padding: 3px 10px;
       border-radius: 50px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      background: var(--accent-light);
-      color: var(--accent);
-    }
-    .paper-date {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--field-bg, var(--accent-light));
+      color: var(--field, var(--accent));
+      border: 1px solid var(--field, var(--accent));
+      opacity: 0.85;
+      letter-spacing: 0.3px;
     }
 
     .paper-title {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 1.15rem;
-      font-weight: 600;
+      font-size: 1.05rem;
+      font-weight: 700;
       line-height: 1.5;
-      margin-bottom: 12px;
       color: var(--text-primary);
-    }
-    .paper-title a {
-      color: inherit;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .paper-title a:hover { color: var(--accent); }
-
-    .paper-authors {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+      margin-bottom: var(--space-3);
+      letter-spacing: -0.01em;
     }
 
-    .paper-abstract {
+    .paper-summary {
       font-size: 0.9rem;
       color: var(--text-secondary);
-      line-height: 1.7;
-      margin-bottom: 18px;
-      flex-grow: 1;
+      line-height: 1.75;
+      margin-bottom: var(--space-5);
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      flex-grow: 1;
     }
 
-    .paper-footer {
+    .card-footer {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-standard);
       margin-top: auto;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
     }
-    .paper-tags {
+
+    .paper-meta {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: var(--space-1);
     }
-    .paper-tag {
+
+    .paper-venue {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    .paper-year {
       font-size: 0.75rem;
       color: var(--text-muted);
-      background: var(--bg-primary);
-      padding: 3px 10px;
-      border-radius: 4px;
     }
-    .read-more {
+
+    /* ====== Star Rating ====== */
+    .star-rating {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-1);
+    }
+
+    .stars {
+      display: flex;
+      gap: 2px;
+    }
+
+    .star {
+      width: 14px;
+      height: 14px;
+      color: var(--field, var(--accent));
+    }
+
+    .star.empty {
+      color: var(--text-muted);
+      opacity: 0.3;
+    }
+
+    .score-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ====== Empty State ====== */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-16) var(--space-6);
+      color: var(--text-tertiary);
+      display: none;
+    }
+
+    .empty-state.show {
+      display: block;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    /* ====== Footer ====== */
+    footer {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-elevated);
+      border-top: 1px solid var(--border-standard);
+      padding: var(--space-10) var(--space-6);
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+    }
+
+    .footer-left {
       font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    .footer-left a {
       color: var(--accent);
       text-decoration: none;
       font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: gap 0.2s;
+      transition: color var(--transition-fast);
     }
-    .read-more:hover { gap: 8px; }
 
-    /* No results */
-    .no-results {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      display: none;
+    .footer-left a:hover {
+      color: var(--accent-hover);
     }
-    .no-results.show { display: block; }
 
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border);
-      background: var(--bg-secondary);
-      padding: 32px 24px;
-      text-align: center;
-    }
-    footer p {
+    .footer-center {
       font-size: 0.85rem;
       color: var(--text-muted);
     }
-    footer a { color: var(--accent); text-decoration: none; }
 
-    /* Scroll to top */
+    .footer-right {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .heart {
+      color: #EC4899;
+    }
+
+    /* ====== Scroll Top ====== */
     .scroll-top {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 44px;
-      height: 44px;
+      bottom: var(--space-6);
+      right: var(--space-6);
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-standard);
+      color: var(--text-secondary);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+      transform: translateY(12px);
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-rest);
       z-index: 99;
     }
-    .scroll-top.visible { opacity: 1; transform: translateY(0); }
-    .scroll-top:hover { background: var(--accent-hover); transform: translateY(-2px); }
 
-    /* Mobile menu */
-    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-primary); }
+    .scroll-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .scroll-top:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    /* ====== Responsive ====== */
     @media (max-width: 640px) {
       .nav-links { display: none; }
-      .mobile-menu-btn { display: block; }
-      .hero { padding-top: 48px; }
-      .hero h1 { font-size: 2rem; }
+      .hero-inner { padding: var(--space-12) var(--space-5) var(--space-8); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .section-header { flex-direction: column; align-items: flex-start; }
+      .search-wrap { max-width: 100%; }
+      .main { padding: var(--space-8) var(--space-5) var(--space-12); }
+      .footer-inner { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="#" class="logo">文献<span>解读</span></a>
-      <div class="nav-links">
-        <a href="#home">首页</a>
-        <a href="#papers">文献</a>
-        <a href="#about">关于</a>
-        <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
-          <span id="theme-icon">&#9790;</span>
-        </button>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      Dive into AI
+    </a>
+    <div class="nav-links">
+      <a href="#papers">文献库</a>
+      <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        AI Chip & Model Optimization
       </div>
-      <button class="mobile-menu-btn" onclick="toggleTheme()">&#9790;</button>
-    </nav>
+      <h1><span class="gradient-text">Dive into AI</span></h1>
+      <p class="hero-subtitle">聚焦 AI 芯片与模型优化前沿文献，从 Hopper 架构到推理引擎，追踪算力与算法的每一次突破。</p>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">文献总量</div>
+          <div class="stat-number" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">近7天新增</div>
+          <div class="stat-number" id="statRecent">0</div>
+          <div class="stat-delta">
+            <span class="trend-up">&#8593;</span>
+            <span>持续收录中</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">技术领域</div>
+          <div class="stat-number" id="statFields">0</div>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <section class="hero" id="home">
-    <h1>文献解读站</h1>
-    <p>记录对学术论文的阅读与思考，涵盖机器学习、计算机视觉、自然语言处理等多个领域</p>
-    <div class="search-box">
-      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      <input type="text" id="searchInput" placeholder="搜索文献标题、作者或关键词..." oninput="filterPapers()">
+  <!-- Main Content -->
+  <main class="main" id="papers">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">文献库</h2>
+        <div class="section-count" id="filterCount">共 0 篇文献</div>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="搜索标题、摘要或关键词..." oninput="filterArticles()">
+      </div>
     </div>
-    <div class="stats">
-      <div class="stat-item"><div class="number" id="stat-total">0</div><div class="label">文献总数</div></div>
-      <div class="stat-item"><div class="number" id="stat-cats">0</div><div class="label">研究领域</div></div>
-      <div class="stat-item"><div class="number" id="stat-tags">0</div><div class="label">标签数量</div></div>
-    </div>
-  </section>
 
-  <main id="papers">
-    <div class="filter-section">
-      <div class="filter-title">按领域筛选</div>
-      <div class="filter-tags" id="categoryFilters"></div>
-    </div>
+    <div class="filter-bar" id="filterBar"></div>
 
     <div class="papers-grid" id="papersGrid"></div>
-    <div class="no-results" id="noResults">
-      <p>&#128269; 没有找到匹配的文献</p>
+
+    <div class="empty-state" id="emptyState">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <p>未找到匹配的文献，请尝试其他关键词或筛选条件</p>
     </div>
   </main>
 
+  <!-- Footer -->
   <footer>
-    <p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+    <div class="footer-inner">
+      <div class="footer-left">
+        数据来源：AI 自动化分析与公开学术数据库 &middot;
+        <a href="https://github.com" target="_blank" rel="noopener">查看 GitHub 仓库</a>
+      </div>
+      <div class="footer-center">
+        Built with <span class="heart">&#10084;</span> for AI chip researchers
+      </div>
+      <div class="footer-right">
+        最后更新：2026-05-11
+      </div>
+    </div>
   </footer>
 
   <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
   </button>
 
   <script>
-    // ======== 配置区：在此添加你的文献数据 ========
-    const papers = [
+    // ============================================================
+    // 文献数据 —— 直接在此数组中添加或修改文献
+    // ============================================================
+    const articles = [
       {
         id: 1,
-        title: "Attention Is All You Need",
-        authors: "Vaswani et al.",
-        venue: "NeurIPS 2017",
-        category: "自然语言处理",
-        date: "2024-01-15",
-        tags: ["Transformer", "Self-Attention", "Seq2Seq"],
-        abstract: "提出了 Transformer 架构，完全基于注意力机制，摒弃了传统的 RNN 和 CNN 结构。该模型在机器翻译任务上取得了当时最优的效果，并以其高效的并行计算能力成为后续大语言模型的基础架构。",
-        link: "posts/attention-is-all-you-need.html"
+        title: "NVIDIA Hopper 架构深度解析：Transformer 引擎与 FP8",
+        summary: "详细分析了 H100 GPU 中的 Transformer 引擎设计，以及 FP8 精度如何为大模型训练提供 2 倍吞吐量提升，同时保持与 FP16 相当的精度水平。",
+        field: "AI芯片",
+        fieldSlug: "chip",
+        venue: "Hot Chips 2024",
+        year: 2024,
+        score: 0.96,
+        link: "https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/"
       },
       {
         id: 2,
-        title: "Deep Residual Learning for Image Recognition",
-        authors: "He et al.",
-        venue: "CVPR 2016",
-        category: "计算机视觉",
-        date: "2024-02-03",
-        tags: ["ResNet", "CNN", "ImageNet"],
-        abstract: "提出了残差学习框架，通过引入跳跃连接（skip connections）解决了深层网络的退化问题。ResNet-152 在 ImageNet 上取得了 3.57% 的 top-5 错误率，成为计算机视觉领域的里程碑工作。",
-        link: "posts/resnet.html"
+        title: "CXL 3.0：打破内存墙的新一代互联技术",
+        summary: "CXL 3.0 引入的交换机和内存池化技术，为大规模 AI 集群提供低延迟、高带宽的互联方案，支持多达 4096 个节点的全局内存共享。",
+        field: "互联技术",
+        fieldSlug: "interconnect",
+        venue: "IEEE Micro",
+        year: 2024,
+        score: 0.92,
+        link: "https://www.computeexpresslink.org/"
       },
       {
         id: 3,
-        title: "Generative Adversarial Networks",
-        authors: "Goodfellow et al.",
-        venue: "NeurIPS 2014",
-        category: "生成模型",
-        date: "2024-02-20",
-        tags: ["GAN", "生成模型", "对抗训练"],
-        abstract: "提出了生成对抗网络（GAN），通过生成器和判别器的博弈过程来学习数据分布。这一框架开创了生成模型的新范式，在图像生成、风格迁移等领域产生了深远影响。",
-        link: "posts/gan.html"
+        title: "FlashAttention-3：异步低精度注意力加速",
+        summary: "通过重叠计算与数据传输、利用 Tensor Cores 的 FP8 支持，FlashAttention-3 在 H100 上实现了 1.5-2 倍于前代的速度，同时支持变长序列。",
+        field: "大模型优化",
+        fieldSlug: "llm",
+        venue: "NeurIPS 2024",
+        year: 2024,
+        score: 0.95,
+        link: "https://arxiv.org/abs/2407.08608"
       },
       {
         id: 4,
-        title: "BERT: Pre-training of Deep Bidirectional Transformers",
-        authors: "Devlin et al.",
-        venue: "NAACL 2019",
-        category: "自然语言处理",
-        date: "2024-03-10",
-        tags: ["BERT", "预训练", "双向编码"],
-        abstract: "提出了基于双向 Transformer 的预训练模型 BERT，通过掩码语言模型和下一句预测任务进行预训练。在 11 项 NLP 任务上取得 SOTA，开启了预训练-微调范式的黄金时代。",
-        link: "posts/bert.html"
+        title: "AWQ：激活感知的权重量化，让 4-bit 推理无损精度",
+        summary: "提出基于激活分布保护的权重量化方案，通过对权重进行逐通道缩放，在 LLaMA 系列模型上实现 4-bit 量化而几乎不损失精度。",
+        field: "模型压缩",
+        fieldSlug: "compress",
+        venue: "MLSys 2024",
+        year: 2024,
+        score: 0.91,
+        link: "https://arxiv.org/abs/2306.00978"
       },
       {
         id: 5,
-        title: "AlphaFold: Using AI for Scientific Discovery",
-        authors: "Jumper et al.",
-        venue: "Nature 2021",
-        category: "生物信息学",
-        date: "2024-03-28",
-        tags: ["蛋白质结构", "深度学习", "科学计算"],
-        abstract: "AlphaFold2 在 CASP14 蛋白质结构预测竞赛中达到了接近实验精度的水平，解决了困扰生物学界 50 年的蛋白质折叠问题，为药物研发和生物学研究开辟了新的可能性。",
-        link: "posts/alphafold.html"
+        title: "vLLM：基于 PagedAttention 的高吞吐 LLM 推理引擎",
+        summary: "引入操作系统中虚拟内存的核心思想到注意力计算中，通过分块内存管理消除 KV Cache 的内存浪费，实现 2-4 倍的吞吐提升。",
+        field: "推理引擎",
+        fieldSlug: "inference",
+        venue: "SOSP 2023",
+        year: 2023,
+        score: 0.94,
+        link: "https://arxiv.org/abs/2309.06180"
       },
       {
         id: 6,
-        title: "Denoising Diffusion Probabilistic Models",
-        authors: "Ho et al.",
-        venue: "NeurIPS 2020",
-        category: "生成模型",
-        date: "2024-04-15",
-        tags: ["Diffusion", "生成模型", "图像生成"],
-        abstract: "提出了去噪扩散概率模型（DDPM），通过前向加噪和反向去噪的过程来生成高质量图像。该方法在图像质量上超越了 GAN，且训练更加稳定，成为 Stable Diffusion 等模型的理论基础。",
-        link: "posts/ddpm.html"
+        title: "AMD MI300X：CDNA 3 架构与统一 APU 设计",
+        summary: "MI300X 采用 3D 堆叠 Chiplet 设计，集成 1530 亿晶体管和 192GB HBM3，统一 CPU 与 GPU 内存空间，为大模型推理提供替代 NVIDIA 的高性价比方案。",
+        field: "AI芯片",
+        fieldSlug: "chip",
+        venue: "ISSCC 2024",
+        year: 2024,
+        score: 0.89,
+        link: "https://www.amd.com/en/products/accelerators/instinct/mi300"
       },
       {
         id: 7,
-        title: "YOLO: You Only Look Once - Unified, Real-Time Object Detection",
-        authors: "Redmon et al.",
-        venue: "CVPR 2016",
-        category: "计算机视觉",
-        date: "2024-05-01",
-        tags: ["目标检测", "实时检测", "YOLO"],
-        abstract: "将目标检测问题转化为单一的回归问题，直接从完整图像中预测边界框和类别概率。YOLO 实现了每秒 45 帧的实时检测速度，在速度-精度权衡上取得了突破性进展。",
-        link: "posts/yolo.html"
+        title: "NVLink-C2C：Grace Hopper 超级芯片的芯片间互联",
+        summary: "NVLink-C2C 提供 900 GB/s 的 CPU-to-GPU 带宽，是 PCIe Gen5 的 7 倍，同时支持一致的内存模型，为大型 Transformer 训练消除了数据搬运瓶颈。",
+        field: "互联技术",
+        fieldSlug: "interconnect",
+        venue: "NVIDIA Blog",
+        year: 2024,
+        score: 0.88,
+        link: "https://developer.nvidia.com/blog/nvidia-grace-hopper-superchip-architecture-in-depth/"
       },
       {
         id: 8,
-        title: "Graph Attention Networks",
-        authors: "Velickovic et al.",
-        venue: "ICLR 2018",
-        category: "图神经网络",
-        date: "2024-05-20",
-        tags: ["GAT", "图神经网络", "注意力机制"],
-        abstract: "将注意力机制引入图神经网络，为邻居节点的不同重要性分配可学习的权重。GAT 在多个图分类和节点分类基准上取得 SOTA，为图表示学习提供了灵活高效的框架。",
-        link: "posts/gat.html"
+        title: "Speculative Decoding：用大模型预测小模型，2x 加速无损生成",
+        summary: "通过一个小型草稿模型快速生成候选 token，再由大模型并行验证，实现 2-3 倍的生成加速且完全保持输出分布不变。",
+        field: "大模型优化",
+        fieldSlug: "llm",
+        venue: "ICML 2023",
+        year: 2023,
+        score: 0.93,
+        link: "https://arxiv.org/abs/2211.17192"
       },
       {
         id: 9,
-        title: "Chain-of-Thought Prompting Elicits Reasoning in LLMs",
-        authors: "Wei et al.",
-        venue: "NeurIPS 2022",
-        category: "自然语言处理",
-        date: "2024-06-08",
-        tags: ["思维链", "提示工程", "大语言模型"],
-        abstract: "发现通过"思维链"提示（在提示中提供中间推理步骤），可以显著提升大语言模型在复杂推理任务上的表现。这一发现催生了推理时扩展（test-time scaling）的研究方向。",
-        link: "posts/cot.html"
-      }
+        title: "GPTQ：逐层量化到 4-bit，单卡即可部署 175B 模型",
+        summary: "基于近似二阶信息的逐层量化方法，将 OPT-175B 和 BLOOM-176B 压缩到 4-bit 精度，推理速度提升 3.25 倍，内存占用减少 75%。",
+        field: "模型压缩",
+        fieldSlug: "compress",
+        venue: "ICLR 2023",
+        year: 2023,
+        score: 0.90,
+        link: "https://arxiv.org/abs/2210.17323"
+      },
+      {
+        id: 10,
+        title: "TensorRT-LLM：NVIDIA 的统一推理优化框架",
+        summary: "集成了 FlashAttention、SmoothQuant、FP8 量化、PagedAttention 等优化技术，提供统一的 Python API，在 H100 上实现业界领先的 LLM 推理吞吐。",
+        field: "推理引擎",
+        fieldSlug: "inference",
+        venue: "NVIDIA GTC 2024",
+        year: 2024,
+        score: 0.91,
+        link: "https://github.com/NVIDIA/TensorRT-LLM"
+      },
+      {
+        id: 11,
+        title: "TPU v5p：Google 的下一代 AI 加速器与光学互联",
+        summary: "TPU v5p 提供 459 TFLOPS BF16 算力和 95GB HBM，通过 optical circuit switches 实现 3D torus 拓扑的动态重配置，支持 8960 颗芯片的 Pod 级训练。",
+        field: "AI芯片",
+        fieldSlug: "chip",
+        venue: "Google Cloud Blog",
+        year: 2024,
+        score: 0.87,
+        link: "https://cloud.google.com/blog/products/compute/introducing-cloud-tpu-v5p"
+      },
+      {
+        id: 12,
+        title: "SmoothQuant：让 8-bit 推理像 FP16 一样准",
+        summary: "发现激活值中的异常值是量化误差的主要来源，通过逐通道缩放将量化难度从激活值迁移到权重上，实现 W8A8 量化而无损精度。",
+        field: "模型压缩",
+        fieldSlug: "compress",
+        venue: "ICML 2023",
+        year: 2023,
+        score: 0.89,
+        link: "https://arxiv.org/abs/2211.10438"
+      },
     ];
 
-    // ======== 动态渲染 ========
-    const categories = [...new Set(papers.map(p => p.category))];
-    let activeCategory = 'all';
+    // ============================================================
+    // 领域配置
+    // ============================================================
+    const fieldConfig = {
+      all:          { label: "全部", color: "#6366F1" },
+      chip:         { label: "AI芯片", color: "#3B82F6" },
+      interconnect: { label: "互联技术", color: "#10B981" },
+      llm:          { label: "大模型优化", color: "#8B5CF6" },
+      compress:     { label: "模型压缩", color: "#F59E0B" },
+      inference:    { label: "推理引擎", color: "#EC4899" },
+    };
 
-    function renderFilters() {
-      const container = document.getElementById('categoryFilters');
-      container.innerHTML = `
-        <div class="filter-tag ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">
-          全部 (${papers.length})
-        </div>
-        ${categories.map(cat => {
-          const count = papers.filter(p => p.category === cat).length;
-          return `<div class="filter-tag ${activeCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">${cat} (${count})</div>`;
-        }).join('')}
-      `;
+    // ============================================================
+    // 状态
+    // ============================================================
+    let activeField = "all";
+
+    // ============================================================
+    // 工具函数
+    // ============================================================
+    function getFieldClass(slug) {
+      const map = {
+        chip: "field-chip",
+        interconnect: "field-interconnect",
+        llm: "field-llm",
+        compress: "field-compress",
+        inference: "field-inference"
+      };
+      return map[slug] || "";
     }
 
-    function renderPapers() {
-      const grid = document.getElementById('papersGrid');
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = papers.filter(p => {
-        const matchCat = activeCategory === 'all' || p.category === activeCategory;
+    function getFieldColor(slug) {
+      return fieldConfig[slug]?.color || fieldConfig.all.color;
+    }
+
+    function getFieldLabel(slug) {
+      return fieldConfig[slug]?.label || slug;
+    }
+
+    function isWithinDays(dateStr, days) {
+      const d = new Date(dateStr);
+      const now = new Date("2026-05-11");
+      const diff = (now - d) / (1000 * 60 * 60 * 24);
+      return diff <= days;
+    }
+
+    function renderStars(score) {
+      const fullStars = Math.floor(score / 0.2);
+      const hasHalf = (score / 0.2) - fullStars >= 0.5;
+      const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+      let html = '';
+      const starSvg = '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+      const halfSvg = '<svg class="star" viewBox="0 0 24 24"><defs><linearGradient id="half"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path fill="url(#half)" stroke="currentColor" stroke-width="1" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+      const emptySvg = '<svg class="star empty" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+      for (let i = 0; i < fullStars; i++) html += starSvg;
+      if (hasHalf) html += halfSvg;
+      for (let i = 0; i < emptyStars; i++) html += emptySvg;
+      return html;
+    }
+
+    // ============================================================
+    // 渲染
+    // ============================================================
+    function renderFilters() {
+      const bar = document.getElementById("filterBar");
+      const fields = ["all", "chip", "interconnect", "llm", "compress", "inference"];
+      bar.innerHTML = fields.map(slug => {
+        const cfg = fieldConfig[slug];
+        const count = slug === "all"
+          ? articles.length
+          : articles.filter(a => a.fieldSlug === slug).length;
+        const isActive = activeField === slug;
+        return `
+          <button class="filter-btn ${isActive ? "active" : ""}" onclick="setField('${slug}')">
+            <span class="filter-dot" style="background:${cfg.color}"></span>
+            ${cfg.label} <span style="opacity:0.6">(${count})</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderArticles() {
+      const grid = document.getElementById("papersGrid");
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const filtered = articles.filter(a => {
+        const matchField = activeField === "all" || a.fieldSlug === activeField;
         const matchSearch = !search ||
-          p.title.toLowerCase().includes(search) ||
-          p.authors.toLowerCase().includes(search) ||
-          p.tags.some(t => t.toLowerCase().includes(search)) ||
-          p.abstract.toLowerCase().includes(search);
-        return matchCat && matchSearch;
+          a.title.toLowerCase().includes(search) ||
+          a.summary.toLowerCase().includes(search) ||
+          a.field.toLowerCase().includes(search);
+        return matchField && matchSearch;
       });
 
-      grid.innerHTML = filtered.map(p => `
-        <article class="paper-card" data-category="${p.category}">
-          <div class="paper-meta">
-            <span class="paper-category">${p.category}</span>
-            <span class="paper-date">${p.date}</span>
-          </div>
-          <h3 class="paper-title"><a href="${p.link}">${p.title}</a></h3>
-          <div class="paper-authors">${p.authors} &middot; ${p.venue}</div>
-          <p class="paper-abstract">${p.abstract}</p>
-          <div class="paper-footer">
-            <div class="paper-tags">${p.tags.map(t => `<span class="paper-tag">${t}</span>`).join('')}</div>
-            <a href="${p.link}" class="read-more">阅读解读 &rarr;</a>
-          </div>
-        </article>
-      `).join('');
+      document.getElementById("filterCount").textContent = `共 ${filtered.length} 篇文献`;
 
-      document.getElementById('noResults').classList.toggle('show', filtered.length === 0);
+      grid.innerHTML = filtered.map(a => {
+        const fieldCls = getFieldClass(a.fieldSlug);
+        const fieldColor = getFieldColor(a.fieldSlug);
+        return `
+          <a href="${a.link}" target="_blank" rel="noopener" class="paper-card ${fieldCls}">
+            <div class="card-header">
+              <span class="field-badge">${getFieldLabel(a.fieldSlug)}</span>
+            </div>
+            <h3 class="paper-title">${a.title}</h3>
+            <p class="paper-summary">${a.summary}</p>
+            <div class="card-footer">
+              <div class="paper-meta">
+                <span class="paper-venue">${a.venue}</span>
+                <span class="paper-year">${a.year}</span>
+              </div>
+              <div class="star-rating">
+                <div class="stars">${renderStars(a.score)}</div>
+                <span class="score-label">AI Score ${(a.score * 100).toFixed(0)}</span>
+              </div>
+            </div>
+          </a>
+        `;
+      }).join("");
+
+      document.getElementById("emptyState").classList.toggle("show", filtered.length === 0);
     }
 
-    function setCategory(cat) {
-      activeCategory = cat;
+    function renderStats() {
+      document.getElementById("statTotal").textContent = articles.length;
+      // 模拟最近7天新增数据（基于 year 为 2024 的文章数量作为演示）
+      document.getElementById("statRecent").textContent = articles.filter(a => a.year === 2024).length;
+      document.getElementById("statFields").textContent = Object.keys(fieldConfig).length - 1;
+    }
+
+    // ============================================================
+    // 交互
+    // ============================================================
+    function setField(slug) {
+      activeField = slug;
       renderFilters();
-      renderPapers();
+      renderArticles();
     }
 
-    function filterPapers() {
-      renderPapers();
+    function filterArticles() {
+      renderArticles();
     }
 
-    function updateStats() {
-      document.getElementById('stat-total').textContent = papers.length;
-      document.getElementById('stat-cats').textContent = categories.length;
-      const allTags = new Set(papers.flatMap(p => p.tags));
-      document.getElementById('stat-tags').textContent = allTags.size;
-    }
-
-    // ======== 主题切换 ========
-    function toggleTheme() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      document.getElementById('theme-icon').textContent = isDark ? '&#9790;' : '&#9788;';
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (saved === 'dark' || (!saved && prefersDark)) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.getElementById('theme-icon').innerHTML = '&#9788;';
-      }
-    }
-
-    // ======== 滚动到顶部 ========
-    window.addEventListener('scroll', () => {
-      document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+    // Scroll top button
+    window.addEventListener("scroll", () => {
+      document.getElementById("scrollTop").classList.toggle("visible", window.scrollY > 500);
     });
 
-    // ======== 初始化 ========
-    initTheme();
+    // ============================================================
+    // 初始化
+    // ============================================================
+    renderStats();
     renderFilters();
-    renderPapers();
-    updateStats();
+    renderArticles();
   </script>
 </body>
 </html>
