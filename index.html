@@ -1026,7 +1026,7 @@
         const fieldCls = getFieldClass(a.fieldSlug);
         const fieldColor = getFieldColor(a.fieldSlug);
         return `
-          <a href="${a.link}" target="_blank" rel="noopener" class="paper-card ${fieldCls}">
+          <a href="detail.html?id=${a.id}" class="paper-card ${fieldCls}">
             <div class="card-header">
               <span class="field-badge">${getFieldLabel(a.fieldSlug)}</span>
             </div>
