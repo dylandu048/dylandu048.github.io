@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文献解读 - 文献解读站</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #555;
+      --text-muted: #888;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --border: #e5e7eb;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --radius: 12px;
+      --content-width: 760px;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #16162a;
+      --bg-card: #1e1e3a;
+      --text-primary: #f0f0f5;
+      --text-secondary: #b0b0c0;
+      --text-muted: #777;
+      --accent: #60a5fa;
+      --accent-light: rgba(96,165,250,0.15);
+      --border: #2a2a4a;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.8;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+    .nav-right a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-right a:hover { background: var(--accent-light); color: var(--accent); }
+    .theme-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; cursor: pointer; color: var(--text-secondary);
+      font-size: 1rem; transition: all 0.2s;
+    }
+    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+
+    .article-header {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 56px 24px 32px;
+    }
+    .article-meta {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .article-category {
+      padding: 4px 14px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+    .article-date { font-size: 0.85rem; color: var(--text-muted); }
+    .article-header h1 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+    .article-authors {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-authors strong { color: var(--text-primary); }
+
+    .article-content {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05rem;
+      line-height: 2;
+    }
+    .article-content h2 {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 40px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-primary);
+    }
+    .article-content h3 {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 28px 0 14px;
+      color: var(--text-primary);
+    }
+    .article-content p {
+      margin-bottom: 18px;
+      color: var(--text-secondary);
+    }
+    .article-content ul, .article-content ol {
+      margin: 16px 0 16px 24px;
+      color: var(--text-secondary);
+    }
+    .article-content li { margin-bottom: 8px; }
+    .article-content blockquote {
+      margin: 24px 0;
+      padding: 16px 24px;
+      border-left: 4px solid var(--accent);
+      background: var(--bg-card);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+    .article-content code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.9em;
+      background: var(--bg-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .article-content pre {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+    }
+    .article-content pre code {
+      background: none;
+      padding: 0;
+      color: var(--text-primary);
+    }
+    .article-content img {
+      max-width: 100%;
+      border-radius: var(--radius);
+      margin: 20px 0;
+    }
+    .article-content a { color: var(--accent); text-decoration: none; }
+    .article-content a:hover { text-decoration: underline; }
+    .article-content .highlight-box {
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .article-content .highlight-box h4 {
+      font-family: 'Noto Sans SC', sans-serif;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .article-footer {
+      max-width: var(--content-width);
+      margin: 0 auto 60px;
+      padding: 0 24px;
+    }
+    .article-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .article-tag {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .back-link:hover { background: var(--accent-light); border-color: var(--accent); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p { font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .article-header h1 { font-size: 1.5rem; }
+      .article-content { font-size: 1rem; padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">文献<span>解读</span></a>
+      <div class="nav-right">
+        <a href="../index.html">返回首页</a>
+        <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
+          <span id="theme-icon">&#9790;</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <article>
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-category">【分类】</span>
+        <span class="article-date">【日期】</span>
+      </div>
+      <h1>【文章标题】</h1>
+      <div class="article-authors">
+        <strong>作者：</strong>【作者】 &middot; 【会议/期刊】
+      </div>
+    </div>
+
+    <div class="article-content">
+      <!-- 文章内容区域 -->
+      <h2>论文概述</h2>
+      <p>在此处填写论文概述...</p>
+
+      <h2>核心思想</h2>
+      <p>在此处填写核心思想...</p>
+
+      <h2>方法细节</h2>
+      <p>在此处填写方法细节...</p>
+
+      <h2>实验与结果</h2>
+      <p>在此处填写实验结果...</p>
+
+      <h2>个人思考</h2>
+      <p>在此处填写个人思考...</p>
+    </div>
+
+    <div class="article-footer">
+      <div class="article-tags">
+        <span class="article-tag">标签1</span>
+        <span class="article-tag">标签2</span>
+      </div>
+      <a href="../index.html" class="back-link">&larr; 返回文献列表</a>
+    </div>
+  </article>
+
+  <footer>
+    <p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').textContent = isDark ? '\u263E' : '\u2600';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerHTML = '\u2600';
+      }
+    }
+    initTheme();
+  </script>
+</body>
+</html>

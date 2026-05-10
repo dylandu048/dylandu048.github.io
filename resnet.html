@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Residual Learning for Image Recognition - 文献解读站</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-primary: #fafafa; --bg-secondary: #ffffff; --bg-card: #ffffff; --text-primary: #1a1a2e; --text-secondary: #555; --text-muted: #888; --accent: #2563eb; --accent-light: #dbeafe; --border: #e5e7eb; --radius: 12px; --content-width: 760px; }
+    [data-theme="dark"] { --bg-primary: #0f0f1a; --bg-secondary: #16162a; --bg-card: #1e1e3a; --text-primary: #f0f0f5; --text-secondary: #b0b0c0; --text-muted: #777; --accent: #60a5fa; --accent-light: rgba(96,165,250,0.15); --border: #2a2a4a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.8; transition: background 0.3s, color 0.3s; }
+    header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    nav { max-width: var(--content-width); margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+    .nav-right a { text-decoration: none; color: var(--text-secondary); font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+    .nav-right a:hover { background: var(--accent-light); color: var(--accent); }
+    .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text-secondary); font-size: 1rem; transition: all 0.2s; }
+    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+    .article-header { max-width: var(--content-width); margin: 0 auto; padding: 56px 24px 32px; }
+    .article-meta { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .article-category { padding: 4px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 500; background: var(--accent-light); color: var(--accent); }
+    .article-date { font-size: 0.85rem; color: var(--text-muted); }
+    .article-header h1 { font-family: 'Noto Serif SC', serif; font-size: 1.9rem; font-weight: 700; line-height: 1.4; margin-bottom: 16px; }
+    .article-authors { font-size: 0.95rem; color: var(--text-secondary); padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .article-authors strong { color: var(--text-primary); }
+    .article-content { max-width: var(--content-width); margin: 0 auto; padding: 32px 24px 80px; font-family: 'Noto Serif SC', serif; font-size: 1.05rem; line-height: 2; }
+    .article-content h2 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.3rem; font-weight: 600; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); color: var(--text-primary); }
+    .article-content h3 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 28px 0 14px; color: var(--text-primary); }
+    .article-content p { margin-bottom: 18px; color: var(--text-secondary); }
+    .article-content ul, .article-content ol { margin: 16px 0 16px 24px; color: var(--text-secondary); }
+    .article-content li { margin-bottom: 8px; }
+    .article-content blockquote { margin: 24px 0; padding: 16px 24px; border-left: 4px solid var(--accent); background: var(--bg-card); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; color: var(--text-secondary); }
+    .article-content code { font-family: 'SF Mono', monospace; font-size: 0.9em; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+    .article-content pre { background: var(--bg-secondary); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+    .article-content pre code { background: none; padding: 0; color: var(--text-primary); }
+    .article-content a { color: var(--accent); text-decoration: none; }
+    .article-content a:hover { text-decoration: underline; }
+    .highlight-box { background: var(--accent-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 24px 0; }
+    .highlight-box h4 { font-family: 'Noto Sans SC', sans-serif; margin-bottom: 10px; color: var(--accent); }
+    .article-footer { max-width: var(--content-width); margin: 0 auto 60px; padding: 0 24px; }
+    .article-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .article-tag { font-size: 0.8rem; color: var(--text-muted); background: var(--bg-secondary); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--accent); font-weight: 500; font-size: 0.95rem; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.2s; }
+    .back-link:hover { background: var(--accent-light); border-color: var(--accent); }
+    footer { border-top: 1px solid var(--border); background: var(--bg-secondary); padding: 32px 24px; text-align: center; }
+    footer p { font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 640px) { .article-header h1 { font-size: 1.5rem; } .article-content { font-size: 1rem; } }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html" class="logo">文献<span>解读</span></a><div class="nav-right"><a href="../index.html">返回首页</a><button class="theme-btn" onclick="toggleTheme()" title="切换主题"><span id="theme-icon">&#9790;</span></button></div></nav></header>
+
+  <article>
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-category">计算机视觉</span>
+        <span class="article-date">2024-02-03</span>
+      </div>
+      <h1>Deep Residual Learning for Image Recognition</h1>
+      <div class="article-authors"><strong>作者：</strong>He et al. &middot; CVPR 2016 (Best Paper)</div>
+    </div>
+
+    <div class="article-content">
+      <h2>论文概述</h2>
+      <p>在深度卷积神经网络的发展过程中，一个直观的想法是：网络越深，表达能力越强，性能应该越好。然而，实践发现当网络深度超过一定阈值后，继续增加层数不仅不会提升性能，反而会导致训练精度和测试精度同时下降——这就是著名的"退化问题"（Degradation Problem）。</p>
+      <p>本文提出的残差学习框架（Residual Learning）优雅地解决了这一问题。ResNet 在 ImageNet 竞赛中以 3.57% 的 top-5 错误率夺冠，并因其简洁有效的设计理念成为计算机视觉领域引用量最高的论文之一。</p>
+
+      <div class="highlight-box">
+        <h4>一句话总结</h4>
+        <p>ResNet 通过引入跳跃连接（Skip Connection）让网络学习残差映射，从而解决了深层网络的退化问题，使得训练上百层甚至上千层的深度网络成为可能。</p>
+      </div>
+
+      <h2>核心思想</h2>
+      <h3>退化问题 vs 过拟合</h3>
+      <p>首先需要区分退化问题和过拟合。过拟合是指训练集上表现好但测试集上表现差；而退化问题是训练集和测试集上的表现都随深度增加而变差。这说明问题不是模型"记住了"数据，而是深层网络难以优化。</p>
+
+      <h3>残差学习</h3>
+      <p>作者提出了一个关键的洞察：如果让网络直接学习从输入 x 到输出 H(x) 的映射很困难，那么可以让网络学习残差 F(x) = H(x) - x，然后通过跳跃连接将输入直接加到输出上：</p>
+      <pre><code>y = F(x, {Wi}) + x</code></pre>
+      <p>其中 F(x) 是经过若干卷积层后的输出，x 是通过跳跃连接直接传递的输入。这种设计的巧妙之处在于：如果最优映射接近恒等映射（identity mapping），那么网络只需要将残差 F(x) 学习为接近零即可，这比直接学习恒等映射要容易得多。</p>
+
+      <h3>跳跃连接的设计</h3>
+      <p>当输入和输出的维度不同时，跳跃连接需要进行维度匹配。论文中采用了两种策略：</p>
+      <ul>
+        <li><strong>零填充</strong>：在缺失的维度上补零，不引入额外参数。</li>
+        <li><strong>1x1 卷积投影</strong>：通过 1x1 卷积调整通道数和空间尺寸。</li>
+      </ul>
+
+      <h2>网络架构</h2>
+      <p>ResNet 提出了多种不同深度的变体，最常用的是 ResNet-18、ResNet-34、ResNet-50、ResNet-101 和 ResNet-152。其中 ResNet-50 及以上采用了"Bottleneck"结构，通过 1x1 卷积先降维再升维，大幅减少参数量和计算量。</p>
+
+      <h2>实验与结果</h2>
+      <p>在 ImageNet 数据集上的实验表明：</p>
+      <ul>
+        <li>ResNet-152 在验证集上取得了 3.57% 的 top-5 错误率</li>
+        <li>ResNet 可以轻松训练到 100+ 层，而普通网络在 34 层就开始退化</li>
+        <li>在 COCO 目标检测任务上，ResNet 作为骨干网络也取得了显著提升</li>
+      </ul>
+
+      <h2>个人思考</h2>
+      <p>ResNet 的成功告诉我们：<strong>好的网络设计不是简单地堆叠更多层，而是要让深层网络至少不差于浅层网络。</strong>跳跃连接提供了一个"保底机制"——如果深层部分没有学到有用的东西，网络至少可以退化为浅层网络的表现。</p>
+      <p>这一思想也启发了后续许多工作，如 DenseNet 的密集连接、SENet 的通道注意力等。可以说，ResNet 不仅是一个网络架构，更是一种"如何设计深层网络"的方法论。</p>
+      <blockquote>"These residual networks are easier to optimize, and can gain accuracy from considerably increased depth."</blockquote>
+    </div>
+
+    <div class="article-footer">
+      <div class="article-tags">
+        <span class="article-tag">ResNet</span>
+        <span class="article-tag">CNN</span>
+        <span class="article-tag">ImageNet</span>
+      </div>
+      <a href="../index.html" class="back-link">&larr; 返回文献列表</a>
+    </div>
+  </article>
+
+  <footer><p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p></footer>
+  <script>
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9790;' : '&#9788;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerHTML = '&#9788;';
+      }
+    }
+    initTheme();
+  </script>
+</body>
+</html>

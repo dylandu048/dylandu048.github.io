@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlphaFold - 文献解读站</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-primary: #fafafa; --bg-secondary: #ffffff; --bg-card: #ffffff; --text-primary: #1a1a2e; --text-secondary: #555; --text-muted: #888; --accent: #2563eb; --accent-light: #dbeafe; --border: #e5e7eb; --radius: 12px; --content-width: 760px; }
+    [data-theme="dark"] { --bg-primary: #0f0f1a; --bg-secondary: #16162a; --bg-card: #1e1e3a; --text-primary: #f0f0f5; --text-secondary: #b0b0c0; --text-muted: #777; --accent: #60a5fa; --accent-light: rgba(96,165,250,0.15); --border: #2a2a4a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.8; transition: background 0.3s, color 0.3s; }
+    header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    nav { max-width: var(--content-width); margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+    .nav-right a { text-decoration: none; color: var(--text-secondary); font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+    .nav-right a:hover { background: var(--accent-light); color: var(--accent); }
+    .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text-secondary); font-size: 1rem; transition: all 0.2s; }
+    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+    .article-header { max-width: var(--content-width); margin: 0 auto; padding: 56px 24px 32px; }
+    .article-meta { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .article-category { padding: 4px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 500; background: var(--accent-light); color: var(--accent); }
+    .article-date { font-size: 0.85rem; color: var(--text-muted); }
+    .article-header h1 { font-family: 'Noto Serif SC', serif; font-size: 1.9rem; font-weight: 700; line-height: 1.4; margin-bottom: 16px; }
+    .article-authors { font-size: 0.95rem; color: var(--text-secondary); padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .article-authors strong { color: var(--text-primary); }
+    .article-content { max-width: var(--content-width); margin: 0 auto; padding: 32px 24px 80px; font-family: 'Noto Serif SC', serif; font-size: 1.05rem; line-height: 2; }
+    .article-content h2 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.3rem; font-weight: 600; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); color: var(--text-primary); }
+    .article-content h3 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 28px 0 14px; color: var(--text-primary); }
+    .article-content p { margin-bottom: 18px; color: var(--text-secondary); }
+    .article-content ul, .article-content ol { margin: 16px 0 16px 24px; color: var(--text-secondary); }
+    .article-content li { margin-bottom: 8px; }
+    .article-content blockquote { margin: 24px 0; padding: 16px 24px; border-left: 4px solid var(--accent); background: var(--bg-card); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; color: var(--text-secondary); }
+    .article-content code { font-family: 'SF Mono', monospace; font-size: 0.9em; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+    .article-content pre { background: var(--bg-secondary); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+    .article-content pre code { background: none; padding: 0; color: var(--text-primary); }
+    .article-content a { color: var(--accent); text-decoration: none; }
+    .article-content a:hover { text-decoration: underline; }
+    .highlight-box { background: var(--accent-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 24px 0; }
+    .highlight-box h4 { font-family: 'Noto Sans SC', sans-serif; margin-bottom: 10px; color: var(--accent); }
+    .article-footer { max-width: var(--content-width); margin: 0 auto 60px; padding: 0 24px; }
+    .article-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .article-tag { font-size: 0.8rem; color: var(--text-muted); background: var(--bg-secondary); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--accent); font-weight: 500; font-size: 0.95rem; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.2s; }
+    .back-link:hover { background: var(--accent-light); border-color: var(--accent); }
+    footer { border-top: 1px solid var(--border); background: var(--bg-secondary); padding: 32px 24px; text-align: center; }
+    footer p { font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 640px) { .article-header h1 { font-size: 1.5rem; } .article-content { font-size: 1rem; } }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html" class="logo">文献<span>解读</span></a><div class="nav-right"><a href="../index.html">返回首页</a><button class="theme-btn" onclick="toggleTheme()" title="切换主题"><span id="theme-icon">&#9790;</span></button></div></nav></header>
+
+  <article>
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-category">生物信息学</span>
+        <span class="article-date">2024-03-28</span>
+      </div>
+      <h1>AlphaFold: Highly Accurate Protein Structure Prediction</h1>
+      <div class="article-authors"><strong>作者：</strong>Jumper et al. &middot; Nature 2021</div>
+    </div>
+
+    <div class="article-content">
+      <h2>论文概述</h2>
+      <p>蛋白质折叠问题被诺贝尔奖得主 Christian B. Anfinsen 称为生物学中"最伟大但尚未解决的问题"之一。蛋白质的功能完全由其三维结构决定，而实验测定结构的方法（如 X 射线晶体学、冷冻电镜）既昂贵又耗时。因此，从氨基酸序列直接预测蛋白质的三维结构，一直是计算生物学领域的"圣杯"。</p>
+      <p>AlphaFold2 在 CASP14（第 14 届蛋白质结构预测关键评估）中取得了突破性的成绩，其预测精度达到了接近实验测定方法的水平。这一成果被认为是人工智能在科学发现领域最重要的应用之一。</p>
+
+      <div class="highlight-box">
+        <h4>一句话总结</h4>
+        <p>AlphaFold2 通过 Evoformer 架构和结构模块，将多序列比对（MSA）和配对特征融合到单一表示中，实现了接近实验精度的蛋白质结构预测。</p>
+      </div>
+
+      <h2>核心思想</h2>
+      <h3>从共进化到结构</h3>
+      <p>蛋白质序列中共同演化的氨基酸对（即在不同物种中同时变化的氨基酸对）往往在三维空间中距离较近。这一洞察是早期蛋白质结构预测方法的基础。AlphaFold2 在此基础上进行了重大创新：不再仅依赖共进化信息，而是直接从原始 MSA 和模板中学习表示。</p>
+
+      <h3>Evoformer 架构</h3>
+      <p>AlphaFold2 的核心是 Evoformer，这是一个基于注意力机制的架构，包含约 48 个块，处理两种表示：</p>
+      <ul>
+        <li><strong>MSA 表示</strong>：捕获序列级别的进化信息</li>
+        <li><strong>配对表示</strong>：捕获残基对之间的关系，直接对应于距离/角度信息</li>
+      </ul>
+      <p>这两种表示通过注意力机制进行双向通信和更新，这是 AlphaFold2 区别于之前方法的关键设计。</p>
+
+      <h3>结构模块与 IPA</h3>
+      <p>Evoformer 的输出被送入结构模块，该模块在三维空间中直接操作，使用 Invariant Point Attention (IPA) 来更新每个残基的主链框架。最终输出每个原子的 3D 坐标，而不是像传统方法那样预测距离或二面角。</p>
+
+      <h2>实验与结果</h2>
+      <p>在 CASP14 上的评估结果显示：</p>
+      <ul>
+        <li>在困难的自由建模（FM）目标上，AlphaFold2 的中位数 GDT 分数达到 92.4，接近实验方法</li>
+        <li>预测的 C-alpha 原子位置的平均 RMSD 误差约为 0.96 埃（angstrom）</li>
+        <li>这一成绩被认为基本解决了单链蛋白质结构预测问题</li>
+      </ul>
+
+      <h2>影响与意义</h2>
+      <p>AlphaFold2 的影响远超机器学习领域：</p>
+      <ul>
+        <li>DeepMind 与 EMBL-EBI 合作，免费提供了超过 2 亿种蛋白质的结构预测</li>
+        <li>极大加速了药物研发、合成生物学、农业育种等领域</li>
+        <li>展示了 AI 方法解决基础科学问题的巨大潜力</li>
+      </ul>
+
+      <h2>个人思考</h2>
+      <p>AlphaFold2 的成功让我深刻认识到：<strong>机器学习在科学领域的最大价值，不在于取代科学家，而在于将人类从繁重的模式识别任务中解放出来，让科学家能够专注于更高层次的科学问题。</strong></p>
+      <p>此外，AlphaFold2 的设计哲学也值得关注——它没有盲目追求更大的模型，而是精心设计了一个能够融合多源异构信息的架构（Evoformer），这体现了在科学问题中，领域知识与深度学习的深度融合往往比单纯的模型 scaling 更加重要。</p>
+      <blockquote>"This work represents the culmination of decades of research and demonstrates the power of AI to accelerate scientific discovery."</blockquote>
+    </div>
+
+    <div class="article-footer">
+      <div class="article-tags">
+        <span class="article-tag">蛋白质结构</span>
+        <span class="article-tag">深度学习</span>
+        <span class="article-tag">科学计算</span>
+      </div>
+      <a href="../index.html" class="back-link">&larr; 返回文献列表</a>
+    </div>
+  </article>
+
+  <footer><p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p></footer>
+  <script>
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9790;' : '&#9788;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerHTML = '&#9788;';
+      }
+    }
+    initTheme();
+  </script>
+</body>
+</html>

@@ -1,148 +1,601 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>AI文献分析报告：人工智能在医疗领域的应用</title>
-    <!-- 引入 Pico.css 轻量级框架，自动美化排版 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <!-- 引入 ECharts 用于图表 -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <!-- 简单表格样式增强 -->
-    <style>
-        /* 自定义一些细节，让引用块更学术 */
-        .ai-insight {
-            background-color: var(--pico-card-background-color);
-            border-left: 4px solid var(--pico-primary);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-        }
-        .badge {
-            font-size: 0.8em;
-            background-color: var(--pico-secondary-background);
-            padding: 0.2rem 0.5rem;
-            border-radius: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文献解读站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #555;
+      --text-muted: #888;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --accent-hover: #1d4ed8;
+      --border: #e5e7eb;
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-hover: 0 8px 24px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #16162a;
+      --bg-card: #1e1e3a;
+      --text-primary: #f0f0f5;
+      --text-secondary: #b0b0c0;
+      --text-muted: #777;
+      --accent: #60a5fa;
+      --accent-light: rgba(96,165,250,0.15);
+      --accent-hover: #93c5fd;
+      --border: #2a2a4a;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: 1px;
+    }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover { background: var(--accent-light); color: var(--accent); }
+    .theme-btn {
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; cursor: pointer; color: var(--text-secondary);
+      font-size: 1rem; transition: all 0.2s;
+    }
+    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+
+    /* Hero */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px 48px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+    .search-box {
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 14px 20px 14px 48px;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .search-box svg {
+      position: absolute;
+      left: 18px; top: 50%;
+      transform: translateY(-50%);
+      width: 20px; height: 20px;
+      fill: var(--text-muted);
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .stat-item .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Main Content */
+    main { max-width: 1200px; margin: 0 auto; padding: 24px 24px 80px; }
+
+    /* Category Filter */
+    .filter-section { margin-bottom: 32px; }
+    .filter-title {
+      font-size: 0.85rem; color: var(--text-muted);
+      margin-bottom: 12px; font-weight: 500;
+    }
+    .filter-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-tag {
+      padding: 8px 18px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .filter-tag:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-tag.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Papers Grid */
+    .papers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+    @media (max-width: 420px) {
+      .papers-grid { grid-template-columns: 1fr; }
+    }
+
+    .paper-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: all 0.25s;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .paper-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .paper-card.hidden { display: none; }
+
+    .paper-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .paper-category {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+    .paper-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .paper-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .paper-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .paper-title a:hover { color: var(--accent); }
+
+    .paper-authors {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .paper-abstract {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 18px;
+      flex-grow: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .paper-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .paper-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .paper-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg-primary);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .read-more {
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s;
+    }
+    .read-more:hover { gap: 8px; }
+
+    /* No results */
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      display: none;
+    }
+    .no-results.show { display: block; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* Scroll to top */
+    .scroll-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+      z-index: 99;
+    }
+    .scroll-top.visible { opacity: 1; transform: translateY(0); }
+    .scroll-top:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+    /* Mobile menu */
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-primary); }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero { padding-top: 48px; }
+      .hero h1 { font-size: 2rem; }
+    }
+  </style>
 </head>
 <body>
-    <nav class="container-fluid">
-        <ul>
-            <li><strong>📄 AI 文献分析报告</strong></li>
-        </ul>
-        <ul>
-            <li><a href="#summary">核心摘要</a></li>
-            <li><a href="#trend">趋势分析</a></li>
-            <li><a href="#papers">关键文献</a></li>
-        </ul>
+  <header>
+    <nav>
+      <a href="#" class="logo">文献<span>解读</span></a>
+      <div class="nav-links">
+        <a href="#home">首页</a>
+        <a href="#papers">文献</a>
+        <a href="#about">关于</a>
+        <button class="theme-btn" onclick="toggleTheme()" title="切换主题">
+          <span id="theme-icon">&#9790;</span>
+        </button>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleTheme()">&#9790;</button>
     </nav>
+  </header>
 
-    <main class="container">
-        <!-- 头部信息 -->
-        <div class="hero">
-            <hgroup>
-                <h1>人工智能在精准医疗中的应用</h1>
-                <h3>基于35篇核心文献的AI分析与知识图谱</h3>
-                <p>分析时间：2026年5月 | 数据源：PubMed & Web of Science <a href="#footnote">[1]</a></p>
-            </hgroup>
+  <section class="hero" id="home">
+    <h1>文献解读站</h1>
+    <p>记录对学术论文的阅读与思考，涵盖机器学习、计算机视觉、自然语言处理等多个领域</p>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" id="searchInput" placeholder="搜索文献标题、作者或关键词..." oninput="filterPapers()">
+    </div>
+    <div class="stats">
+      <div class="stat-item"><div class="number" id="stat-total">0</div><div class="label">文献总数</div></div>
+      <div class="stat-item"><div class="number" id="stat-cats">0</div><div class="label">研究领域</div></div>
+      <div class="stat-item"><div class="number" id="stat-tags">0</div><div class="label">标签数量</div></div>
+    </div>
+  </section>
+
+  <main id="papers">
+    <div class="filter-section">
+      <div class="filter-title">按领域筛选</div>
+      <div class="filter-tags" id="categoryFilters"></div>
+    </div>
+
+    <div class="papers-grid" id="papersGrid"></div>
+    <div class="no-results" id="noResults">
+      <p>&#128269; 没有找到匹配的文献</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+  </footer>
+
+  <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <script>
+    // ======== 配置区：在此添加你的文献数据 ========
+    const papers = [
+      {
+        id: 1,
+        title: "Attention Is All You Need",
+        authors: "Vaswani et al.",
+        venue: "NeurIPS 2017",
+        category: "自然语言处理",
+        date: "2024-01-15",
+        tags: ["Transformer", "Self-Attention", "Seq2Seq"],
+        abstract: "提出了 Transformer 架构，完全基于注意力机制，摒弃了传统的 RNN 和 CNN 结构。该模型在机器翻译任务上取得了当时最优的效果，并以其高效的并行计算能力成为后续大语言模型的基础架构。",
+        link: "posts/attention-is-all-you-need.html"
+      },
+      {
+        id: 2,
+        title: "Deep Residual Learning for Image Recognition",
+        authors: "He et al.",
+        venue: "CVPR 2016",
+        category: "计算机视觉",
+        date: "2024-02-03",
+        tags: ["ResNet", "CNN", "ImageNet"],
+        abstract: "提出了残差学习框架，通过引入跳跃连接（skip connections）解决了深层网络的退化问题。ResNet-152 在 ImageNet 上取得了 3.57% 的 top-5 错误率，成为计算机视觉领域的里程碑工作。",
+        link: "posts/resnet.html"
+      },
+      {
+        id: 3,
+        title: "Generative Adversarial Networks",
+        authors: "Goodfellow et al.",
+        venue: "NeurIPS 2014",
+        category: "生成模型",
+        date: "2024-02-20",
+        tags: ["GAN", "生成模型", "对抗训练"],
+        abstract: "提出了生成对抗网络（GAN），通过生成器和判别器的博弈过程来学习数据分布。这一框架开创了生成模型的新范式，在图像生成、风格迁移等领域产生了深远影响。",
+        link: "posts/gan.html"
+      },
+      {
+        id: 4,
+        title: "BERT: Pre-training of Deep Bidirectional Transformers",
+        authors: "Devlin et al.",
+        venue: "NAACL 2019",
+        category: "自然语言处理",
+        date: "2024-03-10",
+        tags: ["BERT", "预训练", "双向编码"],
+        abstract: "提出了基于双向 Transformer 的预训练模型 BERT，通过掩码语言模型和下一句预测任务进行预训练。在 11 项 NLP 任务上取得 SOTA，开启了预训练-微调范式的黄金时代。",
+        link: "posts/bert.html"
+      },
+      {
+        id: 5,
+        title: "AlphaFold: Using AI for Scientific Discovery",
+        authors: "Jumper et al.",
+        venue: "Nature 2021",
+        category: "生物信息学",
+        date: "2024-03-28",
+        tags: ["蛋白质结构", "深度学习", "科学计算"],
+        abstract: "AlphaFold2 在 CASP14 蛋白质结构预测竞赛中达到了接近实验精度的水平，解决了困扰生物学界 50 年的蛋白质折叠问题，为药物研发和生物学研究开辟了新的可能性。",
+        link: "posts/alphafold.html"
+      },
+      {
+        id: 6,
+        title: "Denoising Diffusion Probabilistic Models",
+        authors: "Ho et al.",
+        venue: "NeurIPS 2020",
+        category: "生成模型",
+        date: "2024-04-15",
+        tags: ["Diffusion", "生成模型", "图像生成"],
+        abstract: "提出了去噪扩散概率模型（DDPM），通过前向加噪和反向去噪的过程来生成高质量图像。该方法在图像质量上超越了 GAN，且训练更加稳定，成为 Stable Diffusion 等模型的理论基础。",
+        link: "posts/ddpm.html"
+      },
+      {
+        id: 7,
+        title: "YOLO: You Only Look Once - Unified, Real-Time Object Detection",
+        authors: "Redmon et al.",
+        venue: "CVPR 2016",
+        category: "计算机视觉",
+        date: "2024-05-01",
+        tags: ["目标检测", "实时检测", "YOLO"],
+        abstract: "将目标检测问题转化为单一的回归问题，直接从完整图像中预测边界框和类别概率。YOLO 实现了每秒 45 帧的实时检测速度，在速度-精度权衡上取得了突破性进展。",
+        link: "posts/yolo.html"
+      },
+      {
+        id: 8,
+        title: "Graph Attention Networks",
+        authors: "Velickovic et al.",
+        venue: "ICLR 2018",
+        category: "图神经网络",
+        date: "2024-05-20",
+        tags: ["GAT", "图神经网络", "注意力机制"],
+        abstract: "将注意力机制引入图神经网络，为邻居节点的不同重要性分配可学习的权重。GAT 在多个图分类和节点分类基准上取得 SOTA，为图表示学习提供了灵活高效的框架。",
+        link: "posts/gat.html"
+      },
+      {
+        id: 9,
+        title: "Chain-of-Thought Prompting Elicits Reasoning in LLMs",
+        authors: "Wei et al.",
+        venue: "NeurIPS 2022",
+        category: "自然语言处理",
+        date: "2024-06-08",
+        tags: ["思维链", "提示工程", "大语言模型"],
+        abstract: "发现通过"思维链"提示（在提示中提供中间推理步骤），可以显著提升大语言模型在复杂推理任务上的表现。这一发现催生了推理时扩展（test-time scaling）的研究方向。",
+        link: "posts/cot.html"
+      }
+    ];
+
+    // ======== 动态渲染 ========
+    const categories = [...new Set(papers.map(p => p.category))];
+    let activeCategory = 'all';
+
+    function renderFilters() {
+      const container = document.getElementById('categoryFilters');
+      container.innerHTML = `
+        <div class="filter-tag ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">
+          全部 (${papers.length})
         </div>
+        ${categories.map(cat => {
+          const count = papers.filter(p => p.category === cat).length;
+          return `<div class="filter-tag ${activeCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">${cat} (${count})</div>`;
+        }).join('')}
+      `;
+    }
 
-        <!-- 第一部分：AI 智能总结 -->
-        <section id="summary">
-            <h2>🧠 AI 核心洞察</h2>
-            <div class="grid">
-                <div class="ai-insight">
-                    <h5>📈 研究热点演变</h5>
-                    <p><mark>Transformer架构</mark>正在取代传统的CNN成为医学影像分析的主流。同时，<strong>大语言模型（LLMs）</strong>在电子病历（EHR）挖掘中的应用增长了200%。</p>
-                    <small class="badge">置信度: 92%</small>
-                </div>
-                <div class="ai-insight">
-                    <h5>🔗 未被发掘的关联</h5>
-                    <p>分析发现，“可解释性AI (XAI)” 与 “临床医生信任度”之间存在强相关性，但现有综述中仅有15%的文献同时探讨这两者，是潜在的研究突破口。</p>
-                    <small class="badge">基于共现分析</small>
-                </div>
-            </div>
-        </section>
+    function renderPapers() {
+      const grid = document.getElementById('papersGrid');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = papers.filter(p => {
+        const matchCat = activeCategory === 'all' || p.category === activeCategory;
+        const matchSearch = !search ||
+          p.title.toLowerCase().includes(search) ||
+          p.authors.toLowerCase().includes(search) ||
+          p.tags.some(t => t.toLowerCase().includes(search)) ||
+          p.abstract.toLowerCase().includes(search);
+        return matchCat && matchSearch;
+      });
 
-        <!-- 第二部分：可视化图表 (ECharts) -->
-        <section id="trend">
-            <h2>📊 历年发文量趋势</h2>
-            <div class="card">
-                <div id="trendChart" style="height: 400px; width: 100%;"></div>
-                <p class="text-center"><small>▲ 2023年之后因AI爆发式增长，该领域进入指数级上升期</small></p>
-            </div>
-        </section>
+      grid.innerHTML = filtered.map(p => `
+        <article class="paper-card" data-category="${p.category}">
+          <div class="paper-meta">
+            <span class="paper-category">${p.category}</span>
+            <span class="paper-date">${p.date}</span>
+          </div>
+          <h3 class="paper-title"><a href="${p.link}">${p.title}</a></h3>
+          <div class="paper-authors">${p.authors} &middot; ${p.venue}</div>
+          <p class="paper-abstract">${p.abstract}</p>
+          <div class="paper-footer">
+            <div class="paper-tags">${p.tags.map(t => `<span class="paper-tag">${t}</span>`).join('')}</div>
+            <a href="${p.link}" class="read-more">阅读解读 &rarr;</a>
+          </div>
+        </article>
+      `).join('');
 
-        <!-- 第三部分：关键文献表格 (带搜索) -->
-        <section id="papers">
-            <h2>📚 AI 筛选出的关键文献</h2>
-            <div class="overflow-auto">
-                <table class="striped" role="grid">
-                    <thead>
-                        <tr>
-                            <th scope="col">标题</th>
-                            <th scope="col">期刊/来源</th>
-                            <th scope="col">AI评分(0-1)</th>
-                            <th scope="col">核心发现(由AI生成)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Attention is All You Need in Radiology</strong></td>
-                            <td>Nature Medicine</td>
-                            <td><span class="badge" style="background:#0284c7; color:white;">0.98</span></td>
-                            <td>提出了一种新型视觉Transformer，将肺炎诊断准确率提升至99%</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ethical considerations of LLMs in clinical practice</strong></td>
-                            <td>The Lancet Digital Health</td>
-                            <td><span class="badge" style="background:#0284c7; color:white;">0.85</span></td>
-                            <td>系统评估了GPT-4在临床决策中的偏见与风险</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Multi-omics integration via graph neural networks</strong></td>
-                            <td>Cell Systems</td>
-                            <td><span class="badge" style="background:#0284c7; color:white;">0.92</span></td>
-                            <td>通过GNN整合基因组与蛋白质组数据，发现新药物靶点</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-center"><small>* 表格数据支持排序，你可以直接在这里进行知识性拓展阅读。</small></p>
-        </section>
+      document.getElementById('noResults').classList.toggle('show', filtered.length === 0);
+    }
 
-        <footer id="footnote" class="text-center" style="margin-top: 3rem; padding: 2rem 0; border-top: 1px solid var(--pico-muted-border-color);">
-            <small>免责声明：本网页由AI辅助生成，分析结果仅供参考。参考文献可在GitHub仓库中查看完整数据。</small><br>
-            <small>最后更新: 2026年5月11日</small>
-        </footer>
-    </main>
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderFilters();
+      renderPapers();
+    }
 
-    <script>
-        // 初始化 ECharts 趋势图
-        var chartDom = document.getElementById('trendChart');
-        var myChart = echarts.init(chartDom);
-        var option = {
-            tooltip: { trigger: 'axis' },
-            xAxis: { type: 'category', data: ['2020', '2021', '2022', '2023', '2024', '2025'] },
-            yAxis: { type: 'value', name: '发文量' },
-            series: [
-                {
-                    name: 'AI医疗文献',
-                    type: 'line',
-                    smooth: true,
-                    data: [12, 18, 29, 68, 145, 289],
-                    areaStyle: { opacity: 0.3 },
-                    lineStyle: { color: '#5470c6', width: 3 },
-                    symbol: 'circle',
-                    symbolSize: 10,
-                    itemStyle: { color: '#5470c6' }
-                }
-            ]
-        };
-        myChart.setOption(option);
-        // 适配窗口大小变化
-        window.addEventListener('resize', function() { myChart.resize(); });
-    </script>
+    function filterPapers() {
+      renderPapers();
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = papers.length;
+      document.getElementById('stat-cats').textContent = categories.length;
+      const allTags = new Set(papers.flatMap(p => p.tags));
+      document.getElementById('stat-tags').textContent = allTags.size;
+    }
+
+    // ======== 主题切换 ========
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').textContent = isDark ? '&#9790;' : '&#9788;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerHTML = '&#9788;';
+      }
+    }
+
+    // ======== 滚动到顶部 ========
+    window.addEventListener('scroll', () => {
+      document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+    });
+
+    // ======== 初始化 ========
+    initTheme();
+    renderFilters();
+    renderPapers();
+    updateStats();
+  </script>
 </body>
 </html>

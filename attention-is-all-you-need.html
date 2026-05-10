@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attention Is All You Need - 文献解读站</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fafafa; --bg-secondary: #ffffff; --bg-card: #ffffff;
+      --text-primary: #1a1a2e; --text-secondary: #555; --text-muted: #888;
+      --accent: #2563eb; --accent-light: #dbeafe;
+      --border: #e5e7eb; --radius: 12px; --content-width: 760px;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0f0f1a; --bg-secondary: #16162a; --bg-card: #1e1e3a;
+      --text-primary: #f0f0f5; --text-secondary: #b0b0c0; --text-muted: #777;
+      --accent: #60a5fa; --accent-light: rgba(96,165,250,0.15);
+      --border: #2a2a4a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg-primary); color: var(--text-primary);
+      line-height: 1.8; transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    nav {
+      max-width: var(--content-width); margin: 0 auto;
+      padding: 0 24px; display: flex; align-items: center;
+      justify-content: space-between; height: 64px;
+    }
+    .logo { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+    .nav-right a { text-decoration: none; color: var(--text-secondary); font-size: 0.9rem; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; }
+    .nav-right a:hover { background: var(--accent-light); color: var(--accent); }
+    .theme-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text-secondary); font-size: 1rem; transition: all 0.2s; }
+    .theme-btn:hover { background: var(--accent-light); color: var(--accent); }
+
+    .article-header { max-width: var(--content-width); margin: 0 auto; padding: 56px 24px 32px; }
+    .article-meta { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .article-category { padding: 4px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 500; background: var(--accent-light); color: var(--accent); }
+    .article-date { font-size: 0.85rem; color: var(--text-muted); }
+    .article-header h1 { font-family: 'Noto Serif SC', serif; font-size: 1.9rem; font-weight: 700; line-height: 1.4; margin-bottom: 16px; }
+    .article-authors { font-size: 0.95rem; color: var(--text-secondary); padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .article-authors strong { color: var(--text-primary); }
+
+    .article-content { max-width: var(--content-width); margin: 0 auto; padding: 32px 24px 80px; font-family: 'Noto Serif SC', serif; font-size: 1.05rem; line-height: 2; }
+    .article-content h2 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.3rem; font-weight: 600; margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border); color: var(--text-primary); }
+    .article-content h3 { font-family: 'Noto Sans SC', sans-serif; font-size: 1.1rem; font-weight: 600; margin: 28px 0 14px; color: var(--text-primary); }
+    .article-content p { margin-bottom: 18px; color: var(--text-secondary); }
+    .article-content ul, .article-content ol { margin: 16px 0 16px 24px; color: var(--text-secondary); }
+    .article-content li { margin-bottom: 8px; }
+    .article-content blockquote { margin: 24px 0; padding: 16px 24px; border-left: 4px solid var(--accent); background: var(--bg-card); border-radius: 0 var(--radius) var(--radius) 0; font-style: italic; color: var(--text-secondary); }
+    .article-content code { font-family: 'SF Mono', monospace; font-size: 0.9em; background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+    .article-content pre { background: var(--bg-secondary); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+    .article-content pre code { background: none; padding: 0; color: var(--text-primary); }
+    .article-content a { color: var(--accent); text-decoration: none; }
+    .article-content a:hover { text-decoration: underline; }
+    .highlight-box { background: var(--accent-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 24px 0; }
+    .highlight-box h4 { font-family: 'Noto Sans SC', sans-serif; margin-bottom: 10px; color: var(--accent); }
+
+    .article-footer { max-width: var(--content-width); margin: 0 auto 60px; padding: 0 24px; }
+    .article-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .article-tag { font-size: 0.8rem; color: var(--text-muted); background: var(--bg-secondary); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--accent); font-weight: 500; font-size: 0.95rem; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.2s; }
+    .back-link:hover { background: var(--accent-light); border-color: var(--accent); }
+    footer { border-top: 1px solid var(--border); background: var(--bg-secondary); padding: 32px 24px; text-align: center; }
+    footer p { font-size: 0.85rem; color: var(--text-muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 640px) { .article-header h1 { font-size: 1.5rem; } .article-content { font-size: 1rem; } }
+  </style>
+</head>
+<body>
+  <header><nav><a href="../index.html" class="logo">文献<span>解读</span></a><div class="nav-right"><a href="../index.html">返回首页</a><button class="theme-btn" onclick="toggleTheme()" title="切换主题"><span id="theme-icon">&#9790;</span></button></div></nav></header>
+
+  <article>
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="article-category">自然语言处理</span>
+        <span class="article-date">2024-01-15</span>
+      </div>
+      <h1>Attention Is All You Need</h1>
+      <div class="article-authors"><strong>作者：</strong>Vaswani et al. &middot; NeurIPS 2017</div>
+    </div>
+
+    <div class="article-content">
+      <h2>论文概述</h2>
+      <p>本文提出了 Transformer 架构，这是深度学习领域最具里程碑意义的论文之一。在 Transformer 出现之前，序列到序列（Seq2Seq）模型主要依赖循环神经网络（RNN）及其变体（如 LSTM、GRU），以及卷积神经网络（CNN）。这些方法虽然有效，但都存在固有的局限性：RNN 难以并行化，长距离依赖捕捉困难；CNN 则受限于局部感受野。</p>
+      <p>Transformer 的核心创新在于完全基于注意力机制（Attention Mechanism），彻底摒弃了循环和卷积结构。这一设计不仅大幅提升了训练效率，也为后续 GPT、BERT 等大语言模型奠定了架构基础。</p>
+
+      <div class="highlight-box">
+        <h4>一句话总结</h4>
+        <p>Transformer 用自注意力机制替代了 RNN/CNN，实现了高效的并行计算和全局依赖建模，成为现代 NLP 的基石架构。</p>
+      </div>
+
+      <h2>核心思想</h2>
+      <h3>自注意力机制（Self-Attention）</h3>
+      <p>自注意力机制允许模型在处理序列中的每个位置时，直接关注序列中的所有其他位置。具体来说，对于输入序列中的每个词，模型会计算三个向量：Query（查询）、Key（键）和 Value（值）。注意力权重通过 Query 和 Key 的点积计算得到，再与 Value 相乘得到加权输出。</p>
+      <p>数学上，Scaled Dot-Product Attention 可以表示为：</p>
+      <pre><code>Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V</code></pre>
+      <p>其中除以 sqrt(d_k) 是为了防止点积过大导致 softmax 梯度消失。</p>
+
+      <h3>多头注意力（Multi-Head Attention）</h3>
+      <p>单一的注意力机制可能只能捕捉一种类型的依赖关系。多头注意力通过将 Q、K、V 投影到多个不同的子空间，并行计算多组注意力，再将结果拼接并线性变换。这使得模型能够同时关注不同表示子空间中的信息。</p>
+
+      <h3>位置编码（Positional Encoding）</h3>
+      <p>由于注意力机制本身不包含位置信息，Transformer 通过正弦和余弦函数的位置编码将位置信息注入到输入嵌入中：</p>
+      <pre><code>PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))</code></pre>
+
+      <h2>模型架构</h2>
+      <p>Transformer 采用编码器-解码器（Encoder-Decoder）结构：</p>
+      <ul>
+        <li><strong>编码器</strong>：由 6 个相同的层堆叠而成，每层包含多头自注意力子层和前馈神经网络子层，子层之间使用残差连接和层归一化。</li>
+        <li><strong>解码器</strong>：同样由 6 个相同的层堆叠而成，除了编码器中的两个子层外，还增加了一个编码器-解码器注意力子层，用于关注编码器的输出。</li>
+      </ul>
+
+      <h2>实验与结果</h2>
+      <p>在 WMT 2014 英德翻译任务上，Transformer（big）模型取得了 28.4 BLEU 的成绩，超越了当时所有现有模型，包括集成模型。在英法翻译任务上取得了 41.8 BLEU 的成绩。更重要的是，该模型在 8 块 P100 GPU 上仅需训练 12 小时即可完成，训练效率远超基于 RNN 的模型。</p>
+
+      <h2>个人思考</h2>
+      <p>Transformer 的提出看似是一次"架构简化"——去掉了 RNN 的循环结构，但实际上却带来了表达能力的巨大提升。这篇文章真正展示的是：<strong>当一个简单而优雅的机制被正确设计时，它可以替代复杂的复合结构。</strong></p>
+      <p>此外，这篇文章的标题 "Attention Is All You Need" 也颇具深意。它不仅是对技术方案的概括，也暗示了一个更通用的设计哲学：识别问题的核心瓶颈，然后设计一个专门解决该瓶颈的机制，而非堆砌复杂结构。</p>
+      <blockquote>"The Transformer has since become the de facto standard for NLP tasks and has been extended to vision, speech, and beyond."</blockquote>
+    </div>
+
+    <div class="article-footer">
+      <div class="article-tags">
+        <span class="article-tag">Transformer</span>
+        <span class="article-tag">Self-Attention</span>
+        <span class="article-tag">Seq2Seq</span>
+      </div>
+      <a href="../index.html" class="back-link">&larr; 返回文献列表</a>
+    </div>
+  </article>
+
+  <footer><p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p></footer>
+  <script>
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9790;' : '&#9788;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-icon').innerHTML = '&#9788;';
+      }
+    }
+    initTheme();
+  </script>
+</body>
+</html>
