@@ -130,13 +130,13 @@ const articles = [
   },
   {
     id: 13,
-    title: 'test',
+    title: 'LLM Inference on Edge Devices',
     summary: '边缘设备上的大模型推理正成为研究热点。手机、IoT 设备算力有限，如何在低功耗条件下运行 7B 级别模型是核心挑战。',
-    field: 'AI芯片',
-    fieldSlug: 'chip',
-    venue: 'arXiv',
-    year: 2024,
-    score: 0.9,
+    field: '推理引擎',
+    fieldSlug: 'inference',
+    venue: 'MobiSys 2025',
+    year: 2025,
+    score: 0.88,
   },
 ];
 

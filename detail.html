@@ -513,6 +513,22 @@
     // 主逻辑
     // ============================================================
     function init() {
+      const container = document.getElementById("articleContainer");
+
+      if (typeof articles === 'undefined' || typeof articleDetails === 'undefined') {
+        container.innerHTML = `
+          <div class="not-found">
+            <h2>数据加载失败</h2>
+            <p>文献数据未能正确加载，通常是 <code>data.js</code> 中存在语法错误。</p>
+            <p style="margin-top:12px;font-size:0.85rem;color:var(--text-muted);">
+              提示：如果刚刚添加过新文章，请检查 <code>articleDetails</code> 对象中是否在旧条目末尾漏写了逗号。
+            </p>
+            <a href="index.html">返回文献库</a>
+          </div>
+        `;
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const id = parseInt(params.get("id"), 10);
 

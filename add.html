@@ -460,21 +460,38 @@
     thoughts: '${escapeForJs(sections.thoughts)}'
   }`;
 
-      generatedCode = `// 添加到 articles 数组末尾（在 ]; 之前）：\n${articleEntry},\n\n// 添加到 articleDetails 对象末尾（在 }; 之前）：\n${detailEntry},`;
+      generatedCode = `// 1) 在 articles 数组的 '];' 之前粘贴下面这段（保持原有逗号格式即可）：
+${articleEntry},
+
+// 2) 在 articleDetails 对象的最后一个 '};' 之前粘贴下面这段。
+//    注意：必须在旧最后一个条目的 '}' 后面先加一个逗号！
+${detailEntry}`;
 
       // 构建完整的 data.js（用于下载）
-      fetch('data.js?v=2')
-        .then(r => r.text())
+      fetch('data.js')
+        .then(r => {
+          if (!r.ok) throw new Error('无法读取 data.js，状态码: ' + r.status);
+          return r.text();
+        })
         .then(original => {
           // 插入 articles 数组：在 ]; 前面插入新条目
           const idxArticles = original.indexOf('];');
+          if (idxArticles === -1) throw new Error('无法在 data.js 中找到 articles 数组结尾（];）');
           let result = original.slice(0, idxArticles) + articleEntry + ',\n' + original.slice(idxArticles);
 
           // 插入 articleDetails 对象：在最后一个 }; 前面插入新条目
           const idxDetails = result.lastIndexOf('};');
+          if (idxDetails === -1) throw new Error('无法在 data.js 中找到 articleDetails 对象结尾（};）');
           const nlBefore = result.lastIndexOf('\n', idxDetails);
           fullDataJs = result.slice(0, nlBefore) + ',' + result.slice(nlBefore, idxDetails) + detailEntry + '\n' + result.slice(idxDetails);
 
+          document.getElementById('codePreview').textContent = generatedCode;
+          document.getElementById('resultCard').classList.remove('hidden');
+          document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(err => {
+          alert('生成完整 data.js 失败：' + err.message + '\n\n请使用「复制代码」功能，手动粘贴到 data.js 中。');
+          console.error(err);
           document.getElementById('codePreview').textContent = generatedCode;
           document.getElementById('resultCard').classList.remove('hidden');
           document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
