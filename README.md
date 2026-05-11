@@ -41,23 +41,68 @@ git push origin main
 
 约 1-2 分钟后访问 `https://你的用户名.github.io`。
 
-## 添加/修改文献
+## 添加新文献（推荐）
 
-所有数据在 `index.html` 底部的 `articles` 数组中：
+项目提供两种自动导入方式，无需手动编辑 `data.js`：
+
+### 方式一：浏览器录入（最简单）
+
+打开网站后点击右上角「添加文献」，或直接在浏览器中打开 `add.html`：
+
+1. 填写基础信息（标题、领域、来源等）
+2. 在文本框中粘贴 AI 生成的 Markdown / HTML / 纯文本解析内容
+3. 点击「自动解析」，系统会按章节标题自动提取内容
+4. 检查并补充各章节内容
+5. 点击「生成 data.js 代码」，下载更新后的 `data.js`
+6. 替换仓库中的旧文件，`git commit && git push`
+
+**支持的章节标题关键词**：
+- 研究概述：`研究背景、背景、概述、简介、Introduction`
+- 核心思想：`核心思想、主要贡献、创新点、Core Idea`
+- 技术细节：`技术细节、方法、算法、Method、Technical`
+- 实验验证：`实验、结果、评估、Experiments、Results`
+- 影响意义：`影响、意义、相关工作、Impact`
+- 思考延伸：`思考、总结、展望、Discussion、Conclusion`
+
+### 方式二：命令行导入（适合批量）
+
+```bash
+node tools/add-paper.js                    # 交互式录入
+node tools/add-paper.js paper.md           # 从 Markdown 文件导入
+node tools/add-paper.js paper.md --batch   # 批量模式（不确认直接写入）
+```
+
+支持解析 Markdown 文件中的 frontmatter（YAML 头部元数据）和章节标题。
+
+### 手动编辑 data.js
+
+如需手动修改，所有数据集中在 `data.js` 中：
 
 ```javascript
+// articles 数组 —— 控制卡片展示
 {
-  id: 13,                          // 唯一递增 ID
-  title: "论文标题",                // 文章标题
-  summary: "概述/摘要...",           // 文章概述（2-3行最佳）
-  field: "AI芯片",                  // 显示用领域名称
-  fieldSlug: "chip",                // 领域标识：chip / interconnect / llm / compress / inference
-  venue: "Hot Chips 2024",          // 会议/期刊/来源
-  year: 2024,                       // 发表年份
-  score: 0.94,                      // AI 置信度（0.0 ~ 1.0）
-  link: "https://example.com/..."   // 点击卡片后跳转的 URL
+  id: 13,
+  title: '论文标题',
+  summary: '概述...',
+  field: 'AI芯片',
+  fieldSlug: 'chip',
+  venue: 'Hot Chips 2024',
+  year: 2024,
+  score: 0.94,
+}
+
+// articleDetails 对象 —— 控制详情页内容
+13: {
+  overview: '研究背景...',
+  coreIdea: '核心思想...',
+  technical: '技术细节...',
+  experiments: '实验验证...',
+  impact: '影响与意义...',
+  thoughts: '思考与延伸...'
 }
 ```
+
+**重要**：所有字符串值必须使用单引号，以避免中文引号导致的语法错误。
 
 ### 添加新领域
 

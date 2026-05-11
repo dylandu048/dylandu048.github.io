@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>添加文献 - Dive into AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0A0E17;
+      --bg-elevated: #111827;
+      --bg-card: #161B22;
+      --bg-inset: #0D1117;
+      --text-primary: #E5E7EB;
+      --text-secondary: #9CA3AF;
+      --text-tertiary: #6B7280;
+      --accent: #6366F1;
+      --accent-light: rgba(99,102,241,0.15);
+      --accent-hover: #818CF8;
+      --border-standard: rgba(255,255,255,0.08);
+      --border-hover: rgba(99,102,241,0.35);
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --transition-base: 0.3s ease;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 32px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color var(--transition-base);
+    }
+    .card:hover { border-color: var(--border-hover); }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    input, select, textarea {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color var(--transition-base);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab {
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-standard);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .tab.active {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .section-map {
+      display: grid;
+      gap: 12px;
+    }
+    .map-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .map-row label {
+      padding-top: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-standard);
+    }
+    .btn-secondary:hover { border-color: var(--border-hover); }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .preview-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-standard);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-height: 400px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+
+    .hidden { display: none !important; }
+
+    nav {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .nav-back {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .nav-back:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-brand">Dive into AI</a>
+    <a href="index.html" class="nav-back">← 返回文献库</a>
+  </nav>
+
+  <div class="container">
+    <h1>添加新文献</h1>
+    <p class="subtitle">粘贴 AI 生成的解析内容，自动提取并生成 data.js 代码</p>
+
+    <!-- 元数据 -->
+    <div class="card">
+      <div class="card-title">基础信息</div>
+      <div class="form-grid">
+        <div class="field-group full">
+          <label>文献标题</label>
+          <input type="text" id="inTitle" placeholder="例如：NVIDIA Hopper 架构深度解析">
+        </div>
+        <div class="field-group">
+          <label>领域</label>
+          <select id="inField">
+            <option value="AI芯片">AI芯片</option>
+            <option value="互联技术">互联技术</option>
+            <option value="大模型优化">大模型优化</option>
+            <option value="模型压缩">模型压缩</option>
+            <option value="推理引擎">推理引擎</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>来源 / 会议</label>
+          <input type="text" id="inVenue" placeholder="例如：NeurIPS 2024">
+        </div>
+        <div class="field-group">
+          <label>年份</label>
+          <input type="number" id="inYear" value="2024">
+        </div>
+        <div class="field-group">
+          <label>评分 (0.0 ~ 1.0)</label>
+          <input type="number" id="inScore" value="0.90" step="0.01" min="0" max="1">
+        </div>
+      </div>
+    </div>
+
+    <!-- 内容输入 -->
+    <div class="card">
+      <div class="card-title">解析内容</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('paste')">粘贴内容</button>
+        <button class="tab" onclick="switchTab('manual')">手动填写</button>
+      </div>
+
+      <div id="tab-paste">
+        <div class="field-group full">
+          <textarea id="inContent" placeholder="在此粘贴 Markdown / HTML / 纯文本...
+
+支持格式：
+- Markdown 章节标题 (## 研究背景 / ## 核心思想 等)
+- 自动映射到六个标准章节
+- 未识别的内容可在下方手动调整"></textarea>
+          <p class="hint">粘贴后点击「自动解析」，系统会尝试提取章节内容。若解析不完美，可切换到「手动填写」模式。</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" onclick="autoParse()">自动解析</button>
+          <button class="btn btn-primary" onclick="generateCode()">生成 data.js 代码</button>
+        </div>
+      </div>
+
+      <div id="tab-manual" class="hidden">
+        <div class="section-map">
+          <div class="map-row"><label>研究概述</label><textarea id="sec-overview" placeholder="研究背景与动机..."></textarea></div>
+          <div class="map-row"><label>核心思想</label><textarea id="sec-coreIdea" placeholder="核心创新点..."></textarea></div>
+          <div class="map-row"><label>技术细节</label><textarea id="sec-technical" placeholder="技术实现细节..."></textarea></div>
+          <div class="map-row"><label>实验验证</label><textarea id="sec-experiments" placeholder="实验设置与结果..."></textarea></div>
+          <div class="map-row"><label>影响意义</label><textarea id="sec-impact" placeholder="领域影响..."></textarea></div>
+          <div class="map-row"><label>思考延伸</label><textarea id="sec-thoughts" placeholder="个人思考..."></textarea></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="generateCode()">生成 data.js 代码</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 预览 -->
+    <div class="card hidden" id="resultCard">
+      <div class="card-title">生成的代码</div>
+      <div class="preview-box" id="codePreview"></div>
+      <div class="actions">
+        <button class="btn btn-secondary" onclick="copyCode()">复制代码</button>
+        <button class="btn btn-primary" onclick="downloadDataJs()">下载完整 data.js</button>
+      </div>
+      <p class="hint">下载后用新文件替换旧 data.js，然后 git commit && git push 即可更新网站。</p>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    // ============================================================
+    // 章节映射配置
+    // ============================================================
+    const SECTION_KEYWORDS = {
+      overview:    ['研究背景','背景','概述','简介','研究动机','问题背景','background','overview','introduction','动机','研究问题','前言'],
+      coreIdea:    ['核心思想','核心观点','主要贡献','创新点','核心方法','core idea','main contribution','key insight','contribution','核心思路','核心创新'],
+      technical:   ['技术细节','技术实现','方法','方法论','算法','technical details','method','methodology','approach','implementation','技术方案','具体实现'],
+      experiments: ['实验','实验验证','实验结果','评估','evaluation','experiments','results','benchmark','实验设置','实验分析','性能测试'],
+      impact:      ['影响','意义','影响与意义','领域影响','impact','significance','related work','相关工作','重要性','应用价值'],
+      thoughts:    ['思考','总结','展望','讨论','个人思考','thoughts','discussion','conclusion','future work','反思','局限性']
+    };
+
+    function normalizeKey(str) {
+      return str.toLowerCase().replace(/[^\w\s\u4e00-\u9fff]/g, '').trim();
+    }
+
+    function mdToPlain(md) {
+      return md
+        .replace(/#{1,6}\s*/g, '')
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/\*(.+?)\*/g, '$1')
+        .replace(/`(.+?)`/g, '$1')
+        .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+        .replace(/!\[.*?\]\(.+?\)/g, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+
+    function autoParse() {
+      const raw = document.getElementById('inContent').value;
+      if (!raw.trim()) { alert('请先粘贴内容'); return; }
+
+      const sections = {};
+      const lines = raw.split('\n');
+      let currentKey = null;
+      let buffer = [];
+
+      function flush() {
+        if (currentKey && buffer.length) {
+          sections[currentKey] = mdToPlain(buffer.join('\n').trim());
+        }
+        buffer = [];
+      }
+
+      for (const line of lines) {
+        const hMatch = line.match(/^(#{1,3})\s+(.+)/);
+        if (hMatch) {
+          flush();
+          const title = normalizeKey(hMatch[2]);
+          currentKey = null;
+          for (const [key, keywords] of Object.entries(SECTION_KEYWORDS)) {
+            if (keywords.some(k => title.includes(normalizeKey(k)))) {
+              currentKey = key;
+              break;
+            }
+          }
+          if (!currentKey) {
+            if (/^(intro|前言)/.test(title)) currentKey = 'overview';
+            else if (/^(conclusion|总结|结语)/.test(title)) currentKey = 'thoughts';
+          }
+        } else if (currentKey) {
+          buffer.push(line);
+        }
+      }
+      flush();
+
+      // 将解析结果填入手动模式表单
+      for (const [key, text] of Object.entries(sections)) {
+        const el = document.getElementById('sec-' + key);
+        if (el) el.value = text;
+      }
+
+      // 自动提取标题（如果还没填）
+      if (!document.getElementById('inTitle').value) {
+        const h1 = raw.match(/^#\s+(.+)/m);
+        if (h1) document.getElementById('inTitle').value = h1[1].trim();
+      }
+
+      // 切换到手动模式以便用户检查
+      switchTab('manual');
+
+      const found = Object.keys(sections);
+      alert(`已解析到 ${found.length} 个章节：${found.join(', ') || '无'}\n\n请检查并补充缺失的内容。`);
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-paste').classList.toggle('hidden', name !== 'paste');
+      document.getElementById('tab-manual').classList.toggle('hidden', name !== 'manual');
+    }
+
+    function escapeForJs(str) {
+      if (!str) return '';
+      return str
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '');
+    }
+
+    function extractSummary(text, maxLen = 120) {
+      const plain = text.replace(/\s+/g, ' ').trim();
+      if (plain.length <= maxLen) return plain;
+      return plain.slice(0, maxLen).replace(/\s+\S*$/, '') + '...';
+    }
+
+    function getNextId() {
+      if (typeof articles === 'undefined') return 1;
+      return Math.max(...articles.map(a => a.id), 0) + 1;
+    }
+
+    function getFieldSlug(fieldName) {
+      const map = {
+        'AI芯片': 'chip', '互联技术': 'interconnect', '大模型优化': 'llm',
+        '模型压缩': 'compress', '推理引擎': 'inference'
+      };
+      return map[fieldName] || 'chip';
+    }
+
+    let generatedCode = '';
+    let fullDataJs = '';
+
+    function generateCode() {
+      const title = document.getElementById('inTitle').value.trim();
+      if (!title) { alert('请填写标题'); return; }
+
+      const field = document.getElementById('inField').value;
+      const venue = document.getElementById('inVenue').value.trim() || 'arXiv';
+      const year = parseInt(document.getElementById('inYear').value) || 2024;
+      const score = parseFloat(document.getElementById('inScore').value) || 0.90;
+      const fieldSlug = getFieldSlug(field);
+
+      const sections = {};
+      for (const key of ['overview','coreIdea','technical','experiments','impact','thoughts']) {
+        sections[key] = document.getElementById('sec-' + key).value.trim();
+      }
+
+      const summary = extractSummary(sections.overview || sections.coreIdea || '');
+      const newId = getNextId();
+
+      const articleEntry =
+`  {
+    id: ${newId},
+    title: '${escapeForJs(title)}',
+    summary: '${escapeForJs(summary)}',
+    field: '${escapeForJs(field)}',
+    fieldSlug: '${fieldSlug}',
+    venue: '${escapeForJs(venue)}',
+    year: ${year},
+    score: ${score},
+  }`;
+
+      const detailEntry =
+`  ${newId}: {
+    overview: '${escapeForJs(sections.overview)}',
+    coreIdea: '${escapeForJs(sections.coreIdea)}',
+    technical: '${escapeForJs(sections.technical)}',
+    experiments: '${escapeForJs(sections.experiments)}',
+    impact: '${escapeForJs(sections.impact)}',
+    thoughts: '${escapeForJs(sections.thoughts)}'
+  }`;
+
+      generatedCode = `// 添加到 articles 数组末尾（在 ]; 之前）：\n${articleEntry},\n\n// 添加到 articleDetails 对象末尾（在 }; 之前）：\n${detailEntry},`;
+
+      // 构建完整的 data.js（用于下载）
+      fetch('data.js')
+        .then(r => r.text())
+        .then(original => {
+          // 插入 articles 数组：在 ]; 前面插入新条目
+          const idxArticles = original.indexOf('];');
+          let result = original.slice(0, idxArticles) + articleEntry + ',\n' + original.slice(idxArticles);
+
+          // 插入 articleDetails 对象：在最后一个 }; 前面插入新条目
+          const idxDetails = result.lastIndexOf('};');
+          const nlBefore = result.lastIndexOf('\n', idxDetails);
+          fullDataJs = result.slice(0, nlBefore) + ',' + result.slice(nlBefore, idxDetails) + detailEntry + '\n' + result.slice(idxDetails);
+
+          document.getElementById('codePreview').textContent = generatedCode;
+          document.getElementById('resultCard').classList.remove('hidden');
+          document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(generatedCode).then(() => {
+        const btn = event.target;
+        const old = btn.textContent;
+        btn.textContent = '已复制';
+        setTimeout(() => btn.textContent = old, 1500);
+      });
+    }
+
+    function downloadDataJs() {
+      if (!fullDataJs) return;
+      const blob = new Blob([fullDataJs], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.js';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
