@@ -128,6 +128,16 @@ const articles = [
     year: 2023,
     score: 0.89,
   },
+  {
+    id: 13,
+    title: 'test',
+    summary: '边缘设备上的大模型推理正成为研究热点。手机、IoT 设备算力有限，如何在低功耗条件下运行 7B 级别模型是核心挑战。',
+    field: 'AI芯片',
+    fieldSlug: 'chip',
+    venue: 'arXiv',
+    year: 2024,
+    score: 0.9,
+  },
 ];
 
 const articleDetails = {
@@ -226,5 +236,13 @@ const articleDetails = {
     experiments: '在 OPT-175B 上，SmoothQuant W8A8 的困惑度为 8.58，相比 FP16 的 8.34 仅增加 2.9%。在 LLaMA-2-70B 上，W8A8 的 MT-Bench 评分与 FP16 完全持平。推理速度方面，W8A8 模型在 A100 上的吞吐量为 FP16 的 1.8 倍，内存占用减少 50%。在更激进的 W8A8 配置下（per-token 激活量化），加速比可达 2.1 倍。',
     impact: 'SmoothQuant 已被集成到 NVIDIA TensorRT-LLM、Intel Neural Compressor、AutoGPTQ 等主流框架中。它通常作为第一层量化（从 FP16 到 INT8）的首选方案，后续的更激进量化（如 INT4）则在此基础上进行。SmoothQuant 的\'迁移量化难度\'思想也启发了后来的 QuaRot 等旋转量化方法。',
     thoughts: 'SmoothQuant 的最大贡献在于它提出了一个根本性的问题：量化误差究竟应该由谁来承担？传统方法试图均匀地分摊误差，但 SmoothQuant 证明：将误差从难量化的部分（激活异常值）迁移到易量化的部分（权重）是更优的策略。这种\'非对称量化\'的哲学具有普遍性，可以推广到其他压缩场景。'
+  },
+  13: {
+    overview: '边缘设备上的大模型推理正成为研究热点。手机、IoT 设备算力有限，如何在低功耗条件下运行 7B 级别模型是核心挑战。',
+    coreIdea: '提出自适应推理框架，根据输入复杂度动态选择模型子集，简单查询用小参数分支，复杂查询才激活完整网络。',
+    technical: '实现分为三层：(1) 输入复杂度评估器，用轻量 CNN 预测推理深度；(2) 动态路由模块，按预测结果选择子模型；(3) 结果融合层，合并多分支输出。整体额外开销 < 2%。',
+    experiments: '在 Snapdragon 8 Gen 3 上测试 Llama-2-7B，相比基线吞吐量提升 2.3 倍，能耗降低 45%。准确率损失控制在 1.5% 以内。',
+    impact: '首次在移动端实现自适应推理的动态路由，为端侧 AI 部署提供了新范式。',
+    thoughts: '动态路由的思想可以推广到多模态场景，未来视频/音频推理也可以按需激活不同分支。'
   }
 };
